@@ -66,6 +66,8 @@ public class Rider : MonoBehaviour
         requestedElevator.ElevatorOnRequestedFloor -= GetOnElevator;
         riderState = RiderState.Riding;
         requestedElevator.ElevatorOnRequestedFloor += DestinationReached;
+        
+        // TODO do this in the dispatcher
         requestedElevator.AddDesiredFloor(destinationFloor);
     }
 

@@ -2,11 +2,16 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Elevator : MonoBehaviour
 {
     [SerializeField] private float elevatorSpeed = 0.5f;
     [SerializeField] private float elevatorHeight = 3f;
+
+    [SerializeField] private Text floorDisplay;
+    [SerializeField] private Text directionDisplay;
+    [SerializeField] private Text desiredFloorDisplay;
     
     // The time to wait at each floor
     public float waitTime = 2.0f;
@@ -23,10 +28,10 @@ public class Elevator : MonoBehaviour
     private int maxFloor = 4;
 
     public Action<int> ElevatorOnRequestedFloor;
-
+    
     public int CurrentFloor
     {
-        get => Mathf.RoundToInt(transform.position.y / floorHeight) + 1;
+        get => (int)(transform.position.y / floorHeight) + 1;
     }
 
     public bool IsInUse
@@ -40,6 +45,15 @@ public class Elevator : MonoBehaviour
     }
 
     private float floorHeight = 10f;
+
+    public enum State
+    {
+        Up,
+        Down,
+        Idle
+    }
+
+    public State elevatorState = State.Idle;
     
     // Start is called before the first frame update
     void Start()
@@ -48,17 +62,29 @@ public class Elevator : MonoBehaviour
         elevatorHeight = this.transform.localScale.y;
         
         AddDesiredFloor(3);
+        AddDesiredFloor(4);
+        AddDesiredFloor(1);
+        AddDesiredFloor(2);
     }
 
     // Update is called once per frame
     void Update()
     {
+        floorDisplay.text = "Floor: " + CurrentFloor;
+        directionDisplay.text = "Direction: " + elevatorState;
+        // directionDisplay.text = "Direction: " + (IsInUse ? (IsMovingUp ? "Up" : "Down") : "---");
+        desiredFloorDisplay.text = "Desired: " + GetDesiredFloorString();
+        
         if (!IsInUse)
+        {
             return;
+        }
+            
         
         // Check if the elevator has reached the destination floor
         if (Mathf.Abs(transform.position.y - (((desiredFloors[0] - 1) * floorHeight)) - (elevatorHeight / 2)) < 0.01f)
         {
+            elevatorState = State.Idle;
             // Update the current floor to match the destination floor
             // currentFloor = desiredFloors[0];
 
@@ -107,6 +133,8 @@ public class Elevator : MonoBehaviour
         // Smoothly interpolate the elevator's position towards the target position
         // transform.position = Vector3.Lerp(transform.position, new Vector3(transform.position.x, targetY, transform.position.z), elevatorSpeed * Time.deltaTime);
 
+        elevatorState = transform.position.y - targetY > 0 ? State.Down : State.Up;
+
         // Check if the elevator has reached the target position
         if (Mathf.Abs(transform.position.y - targetY) > 0.01f)
         {
@@ -124,7 +152,8 @@ public class Elevator : MonoBehaviour
 
     public void AddDesiredFloor(int floor)
     {
-        floor = Mathf.Clamp(floor, minFloor, maxFloor);
+        desiredFloors.Add(floor);
+        /*floor = Mathf.Clamp(floor, minFloor, maxFloor);
 
         if (CurrentFloor > floor && IsMovingUp)
         {
@@ -145,7 +174,7 @@ public class Elevator : MonoBehaviour
             
             index++;
         }
-        desiredFloors.Insert(index, floor);
+        desiredFloors.Insert(index, floor);*/
     }
 
     // Maybe this should be done in the dispatcher?  elevators should only know which list of floors they are going to next
@@ -176,8 +205,8 @@ public class Elevator : MonoBehaviour
             }
         }
     }
-    
-    void OnGUI()
+
+    private string GetDesiredFloorString()
     {
         string floors = "";
         foreach (int i in desiredFloors)
@@ -187,8 +216,15 @@ public class Elevator : MonoBehaviour
 
         if (floors.Length > 0)
             floors.Substring(0, floors.Length - 2);
-        
+
+        return floors;
+    }
+    
+    /*void OnGUI()
+    {
+        var floors = GetDesiredFloorString();
+
         GUI.TextArea(new Rect(new Vector2(0, 0), new Vector2(150, 20)), "Current Floor: " + CurrentFloor);
         GUI.TextArea(new Rect(new Vector2(0, 20), new Vector2(150, 20)), "Desired Floors " + floors);
-    }
+    }*/
 }

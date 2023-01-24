@@ -17,19 +17,31 @@ public class ElevatorDispatcher : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (elevatorRequests.Count <= 0)
+            return;
         
+        var request = elevatorRequests.Dequeue();
+        var elevator = GetBestElevator(request.callingFloor, request.destinationFloor);
+
+        if (elevator == null)
+        {
+            elevatorRequests.Enqueue(request);
+            return;
+        }
+        
+        elevator.AddDesiredFloor(request.callingFloor);
     }
 
-    public void RequestElevator(int callingFloor, int destinationFloor)
+    public void RequestElevator(Rider r, int callingFloor, int destinationFloor)
     {
-        elevatorRequests.Enqueue(new ElevatorRequest { callingFloor = callingFloor, destinationFloor = destinationFloor });
+        elevatorRequests.Enqueue(new ElevatorRequest { rider = r, callingFloor = callingFloor, destinationFloor = destinationFloor });
     }
 
     public Elevator GetBestElevator(int callingFloor, int destinationFloor)
     {
         bool movingUp = callingFloor < destinationFloor;
 
-        Elevator bestElevator = elevators[0];
+        Elevator bestElevator = null;
         int bestElevatorScore = 0;
 
         foreach (Elevator e in elevators)
@@ -38,9 +50,9 @@ public class ElevatorDispatcher : MonoBehaviour
             if (!e.IsInUse)
                 currentElevatorScore++;
 
-            if (e.IsMovingUp && movingUp && callingFloor > e.CurrentFloor)
+            if (e.elevatorState == Elevator.State.Up && movingUp && callingFloor > e.CurrentFloor)
                 currentElevatorScore++;
-            else if (!e.IsMovingUp && !movingUp && callingFloor < e.CurrentFloor)
+            else if (e.elevatorState == Elevator.State.Down && !movingUp && callingFloor < e.CurrentFloor)
                 currentElevatorScore++;
 
             if (currentElevatorScore > bestElevatorScore)
