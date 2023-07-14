@@ -6,6 +6,6 @@ public class ElevatorRequest
 {
     public int callingFloor;
     public int destinationFloor;
-    public Rider rider;
-    public bool movingUp => callingFloor < destinationFloor;
+    public int riderIds;
+    public bool goingUp => callingFloor < destinationFloor;
 }

@@ -34,7 +34,7 @@ public class ElevatorDispatcher : MonoBehaviour
 
     public void RequestElevator(Rider r, int callingFloor, int destinationFloor)
     {
-        elevatorRequests.Enqueue(new ElevatorRequest { rider = r, callingFloor = callingFloor, destinationFloor = destinationFloor });
+        // .Enqueue(new ElevatorRequest { rider = r, callingFloor = callingFloor, destinationFloor = destinationFloor });
     }
 
     public Elevator GetBestElevator(int callingFloor, int destinationFloor)

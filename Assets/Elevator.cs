@@ -4,6 +4,45 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+// ----------------- ELEVATOR -----------------
+// Base Functionality: Elevator stops at every floor that is requested, in order that is requested
+
+// Modules
+// 1: Only stop if requested ride is in direction of travel
+// 2: Skip-Stop - only stops on certain floors
+// 3: Prioritize ordering - if a stop is requested, and the floor is on the travel path, stop on that floor
+// 4: Overcrowding Prevention - if it is full, it won't stop on other pickup floors, only drop off floors, until capacity reaches 80% (configurable?)
+// 5: Emergency Response: In emergency situations, elevators with this module with prioritize emergency response (first responders, floors with fires on them, etc.)
+// 6: VIP Mode: This module prioritizes the needs of VIP passengers (locked floors, faster response times)
+// 7: Teleportation Module
+// 8: Return to floor after use
+// 9: Multiple cars in single shaft
+
+// Enhancements
+// 1: Better music
+// 2: Animal Companion -- takes up space on elevator
+// 3: Entertainment (live band, virtual reality) -- takes up space on elevator
+
+// Stats
+// 1: People capacity (moves slower at fuller capacity)
+// 2: Speed
+
+
+// ----------------- Riders -----------------
+// Satisfaction Level (based on cleanliness, speed, crowdedness)
+
+// Riders come in with desired floor and randomly select elevator.  Waits for a while on their floor, then either moves to another floor (20% chance?) or goes back down
+
+// ----------------- Staff -----------------
+// 1: Cleaner
+// 2: Repair
+// 3: Dispatcher? (spreads out riders to multiple elevators)
+
+// ----------------- Building -----------------
+// 1: Certain times of day, certain floors have more requests (room is highlighted to indicate more traffic)
+// 2: Day/night cycle, less people at night
+
+
 public class Elevator : MonoBehaviour
 {
     [SerializeField] private float elevatorSpeed = 0.5f;
