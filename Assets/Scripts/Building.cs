@@ -29,6 +29,8 @@ public class Building : MonoBehaviour
             _floors = value;
         }
     }
+
+    public int Units => buildingUnits.Count;
     
     // Start is called before the first frame update
     void Start()
