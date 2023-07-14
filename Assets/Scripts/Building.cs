@@ -6,6 +6,16 @@ using UnityEngine;
 /*[ExecuteInEditMode]*/
 public class Building : MonoBehaviour
 {
+    public static Building Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+            Destroy(this);
+        else
+            Instance = this;
+    }
+
     [SerializeField]
     private const int STARTING_FLOORS = 5;
     [SerializeField]
@@ -17,7 +27,7 @@ public class Building : MonoBehaviour
     [SerializeField] private GameObject UnitPrefab;
     
     private List<BuildingUnit> buildingUnits = new List<BuildingUnit>();
-    private List<ElevatorV2> elevators = new List<ElevatorV2>();
+    public List<ElevatorV2> elevators = new List<ElevatorV2>();
     
     private int _floors;
 

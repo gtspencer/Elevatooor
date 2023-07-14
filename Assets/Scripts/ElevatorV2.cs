@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,6 +6,10 @@ using UnityEngine.UI;
 
 public class ElevatorV2 : MonoBehaviour
 {
+    [SerializeField] private bool waitForRiders = false;
+    private float defaultElevatorWaitTime = 1f;
+
+
     private const float WAIT_TIME_PER_RIDER = 0.5f;
     
     [SerializeField] private Text currentFloorUI;
@@ -21,9 +26,11 @@ public class ElevatorV2 : MonoBehaviour
     public int CurrentFloor => (int)(transform.position.y / Building.ROOM_HEIGHT) + 1;
     public int NextFloor => floorQueue.Count > 0 ? floorQueue[0] : -1;
 
+    public Action<int> OnFloorStopped;
+
     // TEST CODE
     public int callingFloor = 1;
-    public int desiredFloor = 1;
+    public bool goingUp = true;
     public bool insertRequest = false;
     
     public enum State
@@ -35,6 +42,7 @@ public class ElevatorV2 : MonoBehaviour
     }
     
     public State elevatorState = State.Idle;
+    public bool IsElevatorMoving => elevatorState == State.Down || elevatorState == State.Up;
     
     // Start is called before the first frame update
     void Start()
@@ -47,8 +55,8 @@ public class ElevatorV2 : MonoBehaviour
         insertRequest = false;
         RequestRide(new ElevatorRequest()
         {
-            callingFloor = callingFloor,
-            destinationFloor = desiredFloor
+            floor = callingFloor,
+            goingUp = goingUp
         });
     }
 
@@ -92,6 +100,7 @@ public class ElevatorV2 : MonoBehaviour
 
     void MoveElevator(int floor)
     {
+        Debug.LogError("Moving to floor " + floor);
         // Calculate the target position for the elevator
         float targetY = (floor - 1) * Building.ROOM_HEIGHT;
 
@@ -109,8 +118,27 @@ public class ElevatorV2 : MonoBehaviour
         {
             // Set the elevator's position to the exact target position
             transform.position = new Vector3(position.x, targetY, position.z);
-            StartCoroutine(WaitForPassengersDeparting());
+
+            OnFloorStopped?.Invoke(CurrentFloor);
+            
+            if (waitForRiders)
+                StartCoroutine(WaitForPassengersDeparting());
+            else
+                StartCoroutine(WaitForDefaultTime());
         }
+    }
+
+    private IEnumerator WaitForDefaultTime()
+    {
+        elevatorState = State.PassengersDeparting;
+
+        yield return new WaitForSeconds(defaultElevatorWaitTime);
+        
+        floorQueue.RemoveAt(0);
+        
+        ProcessRequestQueue();
+        
+        elevatorState = State.Idle;
     }
 
     private IEnumerator WaitForPassengersDeparting()
@@ -130,16 +158,16 @@ public class ElevatorV2 : MonoBehaviour
 
     private void ProcessRequestQueue()
     {
+        Debug.LogError("Processing request pool");
+        
         if (requestPool.Count <= 0)
             return;
         
         if (floorQueue.Count <= 0)
         {
-            if (CurrentFloor != requestPool[0].callingFloor)
-                floorQueue.Add(requestPool[0].callingFloor);
-            
-            floorQueue.Add(requestPool[0].destinationFloor);
-            
+            floorQueue.Add(requestPool[0].floor);
+
+            Debug.LogError("request added " + requestPool[0].floor);
             requestPool.RemoveAt(0);
             
             return;
@@ -155,12 +183,12 @@ public class ElevatorV2 : MonoBehaviour
                 // TODO Catch case where both elevator and rider are moving up, but elevator is above the calling floor
                 if (r.goingUp)
                 {
-                    if (CurrentFloor < r.callingFloor)
+                    if (CurrentFloor < r.floor)
                     {
                         removeFromPool.Add(r);
                     
-                        AddToFloorQueueAscending(r.callingFloor);
-                        AddToFloorQueueAscending(r.destinationFloor);
+                        Debug.LogError("request added " + r.floor);
+                        AddToFloorQueueAscending(r.floor);
                     }
                 }
             }
@@ -172,12 +200,12 @@ public class ElevatorV2 : MonoBehaviour
                 // TODO Catch case where both elevator and rider are moving down, but elevator is below the calling floor
                 if (!r.goingUp)
                 {
-                    if (CurrentFloor > r.callingFloor)
+                    if (CurrentFloor > r.floor)
                     {
                         removeFromPool.Add(r);
                     
-                        AddToFloorQueueDescending(r.callingFloor);
-                        AddToFloorQueueDescending(r.destinationFloor);
+                        Debug.LogError("request added " + r.floor);
+                        AddToFloorQueueDescending(r.floor);
                     }
                 }
             }
@@ -192,11 +220,21 @@ public class ElevatorV2 : MonoBehaviour
         if (floorQueue.Contains(value))
             return;
         
+        if (floorQueue.Count <= 0)
+        {
+            floorQueue.Add(value);
+            return;
+        }
+        
         int index = floorQueue.BinarySearch(value);
         if (index < 0)
         {
             index = ~index;
             floorQueue.Insert(index, value);
+        }
+        else
+        {
+            Debug.LogError("Not inserting " + value + " at index " + index);
         }
     }
     
@@ -204,18 +242,38 @@ public class ElevatorV2 : MonoBehaviour
     {
         if (floorQueue.Contains(value))
             return;
-        
+
+        if (floorQueue.Count <= 0)
+        {
+            floorQueue.Add(value);
+            return;
+        }
+
         int index = floorQueue.BinarySearch(value);
         if (index < 0)
         {
             index = ~index;
+            if (index == 0)
+            {
+                index = 1;
+                /*floorQueue.Add(value);
+                return;*/
+            }
+
             floorQueue.Insert(index - 1, value);
+        }
+        else
+        {
+            Debug.LogError("Not inserting " + value + " at index " + index);
         }
     }
 
     public void RequestRide(ElevatorRequest request) 
     {
         requestPool.Add(request);
+        
+        Debug.LogError("Request logged " + request.floor);
+        
         ProcessRequestQueue();
         
         /*if (floorQueue.Count <= 0)

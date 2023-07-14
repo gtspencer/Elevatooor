@@ -17,7 +17,7 @@ public class ElevatorDispatcher : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (elevatorRequests.Count <= 0)
+        /*if (elevatorRequests.Count <= 0)
             return;
         
         var request = elevatorRequests.Dequeue();
@@ -29,7 +29,7 @@ public class ElevatorDispatcher : MonoBehaviour
             return;
         }
         
-        elevator.AddDesiredFloor(request.callingFloor);
+        elevator.AddDesiredFloor(request.callingFloor);*/
     }
 
     public void RequestElevator(Rider r, int callingFloor, int destinationFloor)

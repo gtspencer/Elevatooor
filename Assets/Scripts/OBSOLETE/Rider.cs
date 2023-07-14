@@ -13,15 +13,15 @@ public class Rider : MonoBehaviour
     private int callingFloor = 0;
     private int destinationFloor = 4;
 
-    private RiderState riderState = RiderState.GoingToElevator;
-    enum RiderState
+    // private RiderState riderState = RiderState.GoingToElevator;
+    /*enum RiderState
     {
         GoingToElevator,
         RequestingElevator,
         WaitingForElevator,
         Riding,
         GoingToDestination
-    }
+    }*/
     
     // Start is called before the first frame update
     void Start()
@@ -44,7 +44,7 @@ public class Rider : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        switch (riderState)
+        /*switch (riderState)
         {
             case RiderState.GoingToElevator:
                 MoveToElevator();
@@ -58,30 +58,30 @@ public class Rider : MonoBehaviour
             case RiderState.Riding:
                 RideOnElevator();
                 break;
-        }
+        }*/
     }
 
     private void GetOnElevator(int floor)
     {
-        requestedElevator.ElevatorOnRequestedFloor -= GetOnElevator;
+        /*requestedElevator.ElevatorOnRequestedFloor -= GetOnElevator;
         riderState = RiderState.Riding;
         requestedElevator.ElevatorOnRequestedFloor += DestinationReached;
         
         // TODO do this in the dispatcher
-        requestedElevator.AddDesiredFloor(destinationFloor);
+        requestedElevator.AddDesiredFloor(destinationFloor);*/
     }
 
     private void DestinationReached(int floor)
     {
-        if (floor != destinationFloor)
+        /*if (floor != destinationFloor)
             return;
         requestedElevator.ElevatorOnRequestedFloor -= DestinationReached;
-        riderState = RiderState.GoingToDestination;
+        riderState = RiderState.GoingToDestination;*/
     }
 
     private void MoveToElevator()
     {
-        // TODO get elevator group to walk to
+        /*// TODO get elevator group to walk to
         float elevatorLocation = 0;
         transform.position = Vector3.MoveTowards(transform.position, new Vector3(transform.position.x, transform.position.y, elevatorLocation), riderSpeed * Time.deltaTime);
         
@@ -95,6 +95,6 @@ public class Rider : MonoBehaviour
             // Set the elevator's position to the exact target position
             transform.position = new Vector3(transform.position.x, transform.position.y, elevatorLocation);
             riderState = RiderState.RequestingElevator;
-        }
+        }*/
     }
 }
