@@ -1,4 +1,6 @@
+using System;
 using UnityEngine;
+using UnityEngine.Animations;
 
 public class CameraController : MonoBehaviour
 {
@@ -21,8 +23,18 @@ public class CameraController : MonoBehaviour
     private float xLowerBounds = 0;
     private float xUpperBounds => (building.Units) * Building.UNIT_LENGTH - (Building.UNIT_LENGTH / 2);
 
+    private Transform selectedElevator = null;
+    private PositionConstraint positionConstraint;
+
+    private void Start()
+    {
+        positionConstraint = this.GetComponentInChildren<PositionConstraint>();
+    }
+
     void Update()
     {
+        CheckClick();
+        
         var speed = panSpeed;
         if (Input.GetKey(KeyCode.LeftShift))
             speed *= 2;
@@ -68,5 +80,51 @@ public class CameraController : MonoBehaviour
         clampedPosition.z = Mathf.Clamp(clampedPosition.z, xLowerBounds, xUpperBounds);
         clampedPosition.y = Mathf.Clamp(clampedPosition.y, yLowerBounds, yUpperBounds);
         transform.position = clampedPosition;
+    }
+
+    private void CheckClick()
+    {
+        if (Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+
+            // Check if the ray hits any GameObject
+            if (Physics.Raycast(ray, out hit))
+            {
+                if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Elevator"))
+                {
+                    selectedElevator = hit.collider.gameObject.transform;
+
+                    for (int i = 0; i < positionConstraint.sourceCount; i++)
+                    {
+                        positionConstraint.RemoveSource(i);
+                    }
+
+                    positionConstraint.constraintActive = true;
+                    positionConstraint.AddSource(new ConstraintSource()
+                    {
+                        sourceTransform = selectedElevator,
+                        weight = 1
+                    });
+                }
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            RemoveElevatorConstraint();
+        }
+    }
+
+    private void RemoveElevatorConstraint()
+    {
+        for (int i = 0; i < positionConstraint.sourceCount; i++)
+        {
+            positionConstraint.RemoveSource(i);
+        }
+
+        positionConstraint.constraintActive = false;
+        selectedElevator = null;
     }
 }

@@ -59,6 +59,7 @@ public class RiderSpawnZone : MonoBehaviour
 
     public void ReturnObjectToPool(GameObject obj)
     {
+        obj.transform.SetParent(this.transform);
         obj.SetActive(false);
     }
 }

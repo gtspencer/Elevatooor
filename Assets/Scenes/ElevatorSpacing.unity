@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657815, g: 0.49641192, b: 0.57481617, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -318,6 +318,7 @@ GameObject:
   - component: {fileID: 935467525}
   - component: {fileID: 935467524}
   - component: {fileID: 935467527}
+  - component: {fileID: 935467528}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -384,7 +385,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 935467523}
   m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 20, y: 7, z: 5}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -403,13 +404,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   building: {fileID: 799369598}
-  zoomSpeed: 10
+  zoomSpeed: 100
   zoomMax: 50
-  zoomMin: 7
+  zoomMin: 10
   panSpeed: 10
   borderThickness: 10
   yLowerBounds: 5
   xLowerBounds: 0
+--- !u!1818360608 &935467528
+PositionConstraint:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 935467523}
+  m_Enabled: 1
+  m_Weight: 1
+  m_TranslationAtRest: {x: 0, y: 0, z: 0}
+  m_TranslationOffset: {x: 0, y: 2.5, z: 0}
+  m_AffectTranslationX: 0
+  m_AffectTranslationY: 1
+  m_AffectTranslationZ: 1
+  m_IsContraintActive: 0
+  m_IsLocked: 0
+  m_Sources: []
 --- !u!4 &1782961352 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 588585513484123367, guid: 8be035183004d424094636b117b02862, type: 3}
@@ -459,7 +477,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   riderPrefab: {fileID: 4682056638244936488, guid: 654cbc6739ae3b84c844ec1a51ec4cbd, type: 3}
-  numPooledRiders: 10
+  numPooledRiders: 15
 --- !u!1001 &588585511978575919
 PrefabInstance:
   m_ObjectHideFlags: 0

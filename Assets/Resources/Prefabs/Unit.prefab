@@ -351,7 +351,8 @@ GameObject:
   m_Component:
   - component: {fileID: 588585513621140069}
   - component: {fileID: 6332977773984124951}
-  m_Layer: 0
+  - component: {fileID: 7054761834482626395}
+  m_Layer: 6
   m_Name: Elevator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -386,15 +387,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d54893c53397b1942808333631847321, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  waitForRiders: 0
   currentFloorUI: {fileID: 5735600655427782401}
   desiredFloorUI: {fileID: 2301904571614314584}
   floorQueueUI: {fileID: 8976191520236407707}
   speed: 5
   weightLimit: 500
   callingFloor: 1
-  desiredFloor: 1
+  goingUp: 1
   insertRequest: 0
   elevatorState: 2
+--- !u!65 &7054761834482626395
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 588585513621140070}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 6.326782, z: 9.131595}
+  m_Center: {x: 0, y: 3.1677022, z: -0.23533964}
 --- !u!1 &957831391807033045
 GameObject:
   m_ObjectHideFlags: 0
