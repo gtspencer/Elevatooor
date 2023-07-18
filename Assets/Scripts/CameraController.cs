@@ -21,7 +21,7 @@ public class CameraController : MonoBehaviour
     private float yUpperBounds => (building.Floors) * Building.ROOM_HEIGHT - (Building.ROOM_HEIGHT / 2);
     [SerializeField]
     private float xLowerBounds = 0;
-    private float xUpperBounds => (building.Units) * Building.UNIT_LENGTH - (Building.UNIT_LENGTH / 2);
+    private float xUpperBounds => (building.TotalUnits) * Building.UNIT_LENGTH - (Building.UNIT_LENGTH / 2);
 
     private Transform selectedElevator = null;
     private PositionConstraint positionConstraint;

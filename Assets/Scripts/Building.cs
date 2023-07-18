@@ -27,8 +27,8 @@ public class Building : MonoBehaviour
     [SerializeField] private GameObject UnitPrefab;
     
     private List<BuildingUnit> buildingUnits = new List<BuildingUnit>();
-    public List<ElevatorV2> elevators = new List<ElevatorV2>();
-    
+    // public List<ElevatorV2> elevators = new List<ElevatorV2>();
+
     private int _floors;
 
     public int Floors
@@ -40,7 +40,8 @@ public class Building : MonoBehaviour
         }
     }
 
-    public int Units => buildingUnits.Count;
+    public int TotalUnits => buildingUnits.Count;
+    public List<BuildingUnit> BuildingUnits => buildingUnits;
     
     // Start is called before the first frame update
     void Start()
@@ -62,14 +63,14 @@ public class Building : MonoBehaviour
     public void AddUnit()
     {
         var unit = GameObject.Instantiate(UnitPrefab, this.transform);
+        
         unit.transform.position = new Vector3(0, 0, buildingUnits.Count * UNIT_LENGTH);
         var unitScript = unit.GetComponent<BuildingUnit>();
 
         buildingUnits.Add(unitScript);
+        unit.name = "Unit " + TotalUnits;
         
         unitScript.InitializeWithFloors(Floors);
-        
-        elevators.Add(unitScript.Elevator);
     }
 
     public void AddFloor()

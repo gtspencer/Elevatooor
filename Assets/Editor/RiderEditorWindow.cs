@@ -8,11 +8,15 @@ namespace Editor
     {
         private SerializedProperty riderState;
         private SerializedProperty riderSpeed;
+        private SerializedProperty currentFloor;
+        private SerializedProperty destinationFloor;
         
         private void OnEnable()
         {
             riderState = serializedObject.FindProperty("riderState");
             riderSpeed = serializedObject.FindProperty("riderSpeed");
+            currentFloor = serializedObject.FindProperty("currentFloor");
+            destinationFloor = serializedObject.FindProperty("destinationFloor");
         }
         
         public override void OnInspectorGUI()
@@ -21,6 +25,8 @@ namespace Editor
 
             EditorGUILayout.PropertyField(riderState);
             EditorGUILayout.PropertyField(riderSpeed);
+            EditorGUILayout.PropertyField(currentFloor);
+            EditorGUILayout.PropertyField(destinationFloor);
             
             serializedObject.ApplyModifiedProperties();
             

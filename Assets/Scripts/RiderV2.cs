@@ -5,18 +5,19 @@ using UnityEngine;
 
 public class RiderV2 : MonoBehaviour
 {
-    public int riderId;
+    public string riderId;
     public float riderSpeed = 3f;
 
+    public BuildingUnit selectedBuildingUnit;
     public ElevatorV2 ridingElevator;
-    private int elevatorIndex;
-    private float elevatorPosition => ((elevatorIndex) * Building.UNIT_LENGTH);
+    private int selectedBuildingUnitIndex;
+    private float elevatorPosition => ((selectedBuildingUnitIndex) * Building.UNIT_LENGTH);
 
     private int roomIndex;
     private float roomPosition => (roomIndex * Building.UNIT_LENGTH) + (Building.UNIT_LENGTH / 2);
 
-    private int currentFloor = 1;
-    private int destinationFloor = 2;
+    public int currentFloor = 1;
+    public int destinationFloor = 2;
 
     public Action<RiderV2> OnLeftBuilding;
     
@@ -35,9 +36,10 @@ public class RiderV2 : MonoBehaviour
 
     public void GetRandomElevator()
     {
+        // pick random unit, then get ElevatorFloor from unit
         // find random elevator
-        elevatorIndex = UnityEngine.Random.Range(0, Building.Instance.elevators.Count);
-        ridingElevator = Building.Instance.elevators[elevatorIndex];
+        selectedBuildingUnitIndex = UnityEngine.Random.Range(0, Building.Instance.TotalUnits);
+        selectedBuildingUnit = Building.Instance.BuildingUnits[selectedBuildingUnitIndex];
 
         riderState = RiderState.GoingToElevator;
     }
@@ -87,7 +89,7 @@ public class RiderV2 : MonoBehaviour
         {
             // Set the elevator's position to the exact target position
             transform.position = new Vector3(transform.position.x, transform.position.y, elevatorPosition);
-            RequestRide();
+            RequestInitialRide();
         }
     }
     
@@ -115,64 +117,36 @@ public class RiderV2 : MonoBehaviour
         }
     }
 
-    private void RequestRide()
+    private void RequestInitialRide()
     {
         riderState = RiderState.WaitingForElevator;
-        
-        ElevatorRequest request = new ElevatorRequest()
-        {
-            floor = currentFloor,
-            riderId = riderId
-        };
-        
+
+        bool goingUp = false;
         // if on floor 1, definitely going up
         if (currentFloor == 1)
         {
             destinationFloor = UnityEngine.Random.Range(2, Building.Instance.Floors);
 
-            request.goingUp = true;
+            goingUp = true;
         }
         else
         {
             // TODO randomly select another floor for multi floor customers?
             destinationFloor = 1;
-
-            request.goingUp = false;
         }
         
-        ridingElevator.OnFloorStopped += FloorReached;
-        
-        if (ridingElevator.CurrentFloor == currentFloor && !ridingElevator.IsElevatorMoving)
-            FloorReached(currentFloor);
-        else
-            ridingElevator.RequestRide(request);
+        selectedBuildingUnit.floorsToElevatorFloors[currentFloor].RequestRide(this, goingUp);
     }
 
-    private void FloorReached(int floor)
-    {
-        if (riderState != RiderState.Riding)
-        {
-            if (currentFloor == floor)
-            {
-                GetOnElevator();
-            }
-        }
-        else
-        {
-            if (destinationFloor == floor)
-            {
-                currentFloor = floor;
-                
-                GetOffElevator();
-            }
-        }
-    }
-
-    public void GetOnElevator()
+    public void GetOnElevator(ElevatorV2 elevator)
     {
         riderState = RiderState.Riding;
+
+        this.ridingElevator = elevator;
         
         this.transform.SetParent(ridingElevator.transform);
+
+        ridingElevator.floorReachedCallbacks[destinationFloor] += DestinationFloorReached;
 
         ridingElevator.RequestRide(new ElevatorRequest()
         {
@@ -182,11 +156,19 @@ public class RiderV2 : MonoBehaviour
         });
     }
 
+    private void DestinationFloorReached()
+    {
+        ridingElevator.floorReachedCallbacks[destinationFloor] -= DestinationFloorReached;
+
+        currentFloor = destinationFloor;
+        
+        GetOffElevator();
+    }
+
     public void GetOffElevator()
     {
         this.transform.SetParent(null);
         
-        ridingElevator.OnFloorStopped -= FloorReached;
         ridingElevator = null;
 
         if (currentFloor != 1)
@@ -197,7 +179,7 @@ public class RiderV2 : MonoBehaviour
 
     private void GetRandomRoom()
     {
-        roomIndex = UnityEngine.Random.Range(0, Building.Instance.Units);
+        roomIndex = UnityEngine.Random.Range(0, Building.Instance.TotalUnits);
     }
     
     private void LeaveBuilding()

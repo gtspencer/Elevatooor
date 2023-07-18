@@ -27,7 +27,7 @@ namespace Editor
             var rider = target as RiderManager;
             if (GUILayout.Button("Send Rider"))
             {
-                rider.SendRider();
+                rider.SendNewRider();
             }
         }
     }

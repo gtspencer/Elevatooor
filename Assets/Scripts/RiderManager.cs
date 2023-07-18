@@ -6,11 +6,13 @@ public class RiderManager : MonoBehaviour
 {
     [SerializeField] private RiderSpawnZone riderSpawnZone;
     
-    public void SendRider()
+    public void SendNewRider()
     {
         var newRider = riderSpawnZone.GetObjectFromPool();
 
         var riderScript = newRider.GetComponent<RiderV2>();
+
+        riderScript.riderId = System.Guid.NewGuid().ToString();
 
         riderScript.OnLeftBuilding += RiderLeftBuilding;
         
