@@ -25,8 +25,11 @@ public class Building : MonoBehaviour
     public const float ROOM_HEIGHT = 10;
 
     [SerializeField] private GameObject UnitPrefab;
-    
+    [SerializeField] private GameObject RightWallPrefab;
+
     private List<BuildingUnit> buildingUnits = new List<BuildingUnit>();
+
+    private Dictionary<int, GameObject> floorsToRightWalls = new Dictionary<int, GameObject>();
     // public List<ElevatorV2> elevators = new List<ElevatorV2>();
 
     private int _floors;
@@ -48,16 +51,10 @@ public class Building : MonoBehaviour
     {
         Floors = STARTING_FLOORS;
         
-        for (int i = 0; i < STARTING_UNITS; i++)
+        for (int i = 1; i <= STARTING_UNITS; i++)
         {
             AddUnit();
         }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     public void AddUnit()
@@ -69,8 +66,19 @@ public class Building : MonoBehaviour
 
         buildingUnits.Add(unitScript);
         unit.name = "Unit " + TotalUnits;
+
+        unitScript.unitNumber = TotalUnits;
         
         unitScript.InitializeWithFloors(Floors);
+
+        // move right wall over
+        for (int i = 1; i <= Floors; i++)
+        {
+            if (!floorsToRightWalls.ContainsKey(i))
+                floorsToRightWalls.Add(i, Instantiate(RightWallPrefab, this.transform));
+
+            floorsToRightWalls[i].transform.localPosition = new Vector3(0, i * ROOM_HEIGHT - (ROOM_HEIGHT / 2), TotalUnits * UNIT_LENGTH - (ROOM_HEIGHT / 2));
+        }
     }
 
     public void AddFloor()
@@ -80,5 +88,10 @@ public class Building : MonoBehaviour
         {
             unit.AddFloor();
         }
+        
+        if (!floorsToRightWalls.ContainsKey(Floors))
+            floorsToRightWalls.Add(Floors, Instantiate(RightWallPrefab, this.transform));
+        
+        floorsToRightWalls[Floors].transform.localPosition = new Vector3(0, Floors * ROOM_HEIGHT - (ROOM_HEIGHT / 2), TotalUnits * UNIT_LENGTH - (ROOM_HEIGHT / 2));
     }
 }

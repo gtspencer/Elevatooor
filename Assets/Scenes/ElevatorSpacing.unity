@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657815, g: 0.49641192, b: 0.57481617, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -555,6 +555,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   UnitPrefab: {fileID: 588585513484123368, guid: 8be035183004d424094636b117b02862, type: 3}
+  RightWallPrefab: {fileID: 8846137806308210080, guid: c6d9bf607caf607459099f8fdc4b9196, type: 3}
 --- !u!4 &799369599
 Transform:
   m_ObjectHideFlags: 0
@@ -880,7 +881,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   building: {fileID: 799369598}
-  zoomSpeed: 100
+  startingZoom: 15
+  zoomSpeed: 500
   zoomMax: 50
   zoomMin: 10
   panSpeed: 10

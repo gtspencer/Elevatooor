@@ -6,7 +6,8 @@ public class CameraController : MonoBehaviour
 {
     [SerializeField] private Building building;
 
-    [SerializeField] private float zoomSpeed = 10f; 
+    [SerializeField] private float startingZoom = 15f;
+    [SerializeField] private float zoomSpeed = 500f; 
     [SerializeField]
     private float zoomMax = 50f;
     [SerializeField]
@@ -29,6 +30,7 @@ public class CameraController : MonoBehaviour
     private void Start()
     {
         positionConstraint = this.GetComponentInChildren<PositionConstraint>();
+        transform.position = new Vector3(startingZoom, transform.position.y, transform.position.z);
     }
 
     void Update()
@@ -45,30 +47,33 @@ public class CameraController : MonoBehaviour
         Vector3 keyboardMovement = new Vector3(horizontalInput, verticalInput, 0f) * speed * Time.unscaledDeltaTime;
         transform.Translate(keyboardMovement);
 
-        // Handle mouse input
-        Vector3 mousePosition = Input.mousePosition;
-        Vector3 cameraMovement = Vector3.zero;
+        if (horizontalInput == 0 && verticalInput == 0)
+        {
+            // Handle mouse input
+            Vector3 mousePosition = Input.mousePosition;
+            Vector3 cameraMovement = Vector3.zero;
 
-        if (mousePosition.x < borderThickness)
-        {
-            cameraMovement.x -= speed * Time.unscaledDeltaTime;
-        }
-        else if (mousePosition.x >= Screen.width - borderThickness)
-        {
-            cameraMovement.x += speed * Time.unscaledDeltaTime;
+            if (mousePosition.x < borderThickness)
+            {
+                cameraMovement.x -= speed * Time.unscaledDeltaTime;
+            }
+            else if (mousePosition.x >= Screen.width - borderThickness)
+            {
+                cameraMovement.x += speed * Time.unscaledDeltaTime;
+            }
+
+            if (mousePosition.y < borderThickness)
+            {
+                cameraMovement.y -= speed * Time.unscaledDeltaTime;
+            }
+            else if (mousePosition.y >= Screen.height - borderThickness)
+            {
+                cameraMovement.y += speed * Time.unscaledDeltaTime;
+            }
+
+            transform.Translate(cameraMovement);
         }
 
-        if (mousePosition.y < borderThickness)
-        {
-            cameraMovement.y -= speed * Time.unscaledDeltaTime;
-        }
-        else if (mousePosition.y >= Screen.height - borderThickness)
-        {
-            cameraMovement.y += speed * Time.unscaledDeltaTime;
-        }
-
-        transform.Translate(cameraMovement);
-        
         // Handle scroll wheel input for zooming
         float scrollWheelInput = Input.GetAxis("Mouse ScrollWheel");
         Vector3 zoomMovement = new Vector3(0f, 0f, scrollWheelInput * zoomSpeed * Time.unscaledDeltaTime);

@@ -15,10 +15,15 @@ public class ElevatorV2 : MonoBehaviour
     [SerializeField] private Text currentFloorUI;
     [SerializeField] private Text desiredFloorUI;
     [SerializeField] private Text floorQueueUI;
-    
-    [SerializeField] private float speed = 5f;
+
+    private float currentSpeed;
+    private float currentLerpTime;
+    private float lerpDuration = 1f;
+    [SerializeField] private float maxSpeed = 5f;
+    [SerializeField] private float acceleration = 1f;
     [SerializeField] private int weightLimit = 500; // lbs
 
+    [SerializeField] private bool showAllFloorsInQueue = true;
     public Action OnLitButtonsChanged;
     private List<int> litButtons = new List<int>();
     public List<int> LitButtons => litButtons;
@@ -110,7 +115,32 @@ public class ElevatorV2 : MonoBehaviour
         if (Mathf.Abs(transform.position.y - targetY) > 0.01f)
         {
             // Smoothly interpolate the elevator's position towards the target position
-            transform.position = Vector3.MoveTowards(transform.position, new Vector3(position.x, targetY, position.z), speed * Time.deltaTime);
+            float t = maxSpeed * Time.deltaTime;
+            float normalizedT = Mathf.SmoothStep(0f, 1f, t);
+            
+            transform.position = Vector3.Lerp(transform.position, new Vector3(position.x, targetY, position.z), normalizedT);
+
+
+            /*if (currentLerpTime < lerpDuration)
+            {
+                currentLerpTime += Time.deltaTime;
+                float t = currentLerpTime / lerpDuration;
+
+                if (t < 0.5f)
+                    currentSpeed = Mathf.Lerp(0f, maxSpeed, 2f * t);
+                else
+                {
+                    float decelerationT = (t - .5f) * 2f;
+                    currentSpeed = Mathf.Lerp(maxSpeed, 0f, decelerationT);
+                }
+                
+                Vector3 newPosition = transform.position + transform.forward * currentSpeed * Time.deltaTime;
+                transform.position = newPosition;
+            }
+            else
+            {
+                transform.position = new Vector3(position.x, targetY, position.z);
+            }*/
         }
         else
         {
@@ -188,8 +218,6 @@ public class ElevatorV2 : MonoBehaviour
             floorQueue.Add(requestPool[0].floor);
 
             requestPool.RemoveAt(0);
-            // Debug.LogError("Added floor " + requestPool[0].floor + " at index 0");
-            return;
         }
 
         bool elevatorMovingUp = NextFloor > CurrentFloor;
@@ -287,11 +315,11 @@ public class ElevatorV2 : MonoBehaviour
         floorQueue.Insert(index, value);
     }
 
-    public void RequestRide(ElevatorRequest request) 
+    public void RequestRide(ElevatorRequest request)
     {
         requestPool.Add(request);
 
-        if (!litButtons.Contains(request.floor) && request.insideRequest)
+        if (!litButtons.Contains(request.floor) && (request.insideRequest || showAllFloorsInQueue))
         {
             litButtons.Add(request.floor);
             OnLitButtonsChanged?.Invoke();

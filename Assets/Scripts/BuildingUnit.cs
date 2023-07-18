@@ -8,6 +8,16 @@ public class BuildingUnit : MonoBehaviour
     [SerializeField] private ElevatorV2 elevator;
     [SerializeField] private GameObject baseElevatorShaft;
     [SerializeField] private GameObject baseRoomShaft;
+    
+    [SerializeField] private GameObject LeftWallPrefab;
+
+    [SerializeField] private GameObject RoomRoofPrefab;
+    [SerializeField] private GameObject ShaftRoofPrefab;
+
+    private GameObject currentShaftRoof;
+    private GameObject currentRoomRoof;
+
+    public int unitNumber;
 
     // holds reference to each floor of the elevator
     public Dictionary<int, ElevatorFloor> floorsToElevatorFloors = new Dictionary<int, ElevatorFloor>();
@@ -49,5 +59,25 @@ public class BuildingUnit : MonoBehaviour
         room.transform.localPosition = new Vector3(0, (floors - 1) * roomHeight, 10);
         room.name = "Room " + floors;
         room.SetActive(true);
+
+        // add left wall
+        if (unitNumber == 1)
+        {
+            var leftWallPiece = Instantiate(LeftWallPrefab, this.transform);
+            leftWallPiece.transform.position = new Vector3(0, (floors * Building.ROOM_HEIGHT) - 5, -5);
+        }
+
+        // handle roofs
+        if (floors == Building.Instance.Floors)
+        {
+            if (currentRoomRoof == null)
+                currentRoomRoof = Instantiate(RoomRoofPrefab, this.transform);
+
+            if (currentShaftRoof == null)
+                currentShaftRoof = Instantiate(ShaftRoofPrefab, this.transform);
+
+            currentRoomRoof.transform.localPosition = new Vector3(0, floors * Building.ROOM_HEIGHT, 10);
+            currentShaftRoof.transform.localPosition = new Vector3(0, floors * Building.ROOM_HEIGHT, 0);
+        }
     }
 }

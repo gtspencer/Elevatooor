@@ -99,8 +99,6 @@ public class ElevatorFloor : MonoBehaviour
             }
             
             arrowIndicators.ToggleHighlightUp(false);
-
-            SetElevatorReadyToDepart();
         }
         // elevator going down
         else if (elevator.NextFloor < elevator.CurrentFloor || (elevatorHasNoPlan && !goingUp))
@@ -124,9 +122,8 @@ public class ElevatorFloor : MonoBehaviour
             }
             
             arrowIndicators.ToggleHighlightDown(false);
-            
-            SetElevatorReadyToDepart();
         }
+        SetElevatorReadyToDepart();
     }
 
     private void SetElevatorReadyToDepart()
