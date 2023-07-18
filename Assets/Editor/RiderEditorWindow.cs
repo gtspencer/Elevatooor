@@ -31,10 +31,6 @@ namespace Editor
             serializedObject.ApplyModifiedProperties();
             
             var rider = target as RiderV2;
-            if (GUILayout.Button("Init Ride"))
-            {
-                rider.GetRandomElevator();
-            }
         }
     }
 }

@@ -20,6 +20,10 @@ public class RiderV2 : MonoBehaviour
     public int destinationFloor = 2;
 
     public Action<RiderV2> OnLeftBuilding;
+
+    private const float STARTING_MOOD_LEVEL = 50;
+    private float moodLevel = 50;
+    private float waitTime = 0;
     
     public enum RiderState
     {
@@ -44,7 +48,7 @@ public class RiderV2 : MonoBehaviour
         riderState = RiderState.GoingToElevator;
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         switch (riderState)
         {
@@ -52,6 +56,8 @@ public class RiderV2 : MonoBehaviour
                 MoveToElevator();
                 break;
             case RiderState.WaitingForElevator:
+                waitTime += Time.deltaTime;
+                CheckMood();
                 // do nothing, wait for callback
                 break;
             case RiderState.GoingToDestination:
@@ -66,6 +72,11 @@ public class RiderV2 : MonoBehaviour
             case RiderState.Business:
                 break;
         }
+    }
+
+    private void CheckMood()
+    {
+        
     }
 
     private float minBusinessTime = 3f;
@@ -186,5 +197,21 @@ public class RiderV2 : MonoBehaviour
     {
         riderState = RiderState.Idle;
         OnLeftBuilding?.Invoke(this);
+
+        GiveGold();
+        ResetRider();
+    }
+
+    private void GiveGold()
+    {
+        // TODO calculate multiplier from mood and wait time
+        GoldManager.Instance.AddGoldFromCustomer(1);
+    }
+
+    private void ResetRider()
+    {
+        Debug.LogError("Wait time: " + waitTime);
+        waitTime = 0;
+        moodLevel = STARTING_MOOD_LEVEL;
     }
 }

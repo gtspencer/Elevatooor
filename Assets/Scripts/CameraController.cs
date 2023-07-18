@@ -42,7 +42,7 @@ public class CameraController : MonoBehaviour
         // Handle keyboard input
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
-        Vector3 keyboardMovement = new Vector3(horizontalInput, verticalInput, 0f) * speed * Time.deltaTime;
+        Vector3 keyboardMovement = new Vector3(horizontalInput, verticalInput, 0f) * speed * Time.unscaledDeltaTime;
         transform.Translate(keyboardMovement);
 
         // Handle mouse input
@@ -51,27 +51,27 @@ public class CameraController : MonoBehaviour
 
         if (mousePosition.x < borderThickness)
         {
-            cameraMovement.x -= speed * Time.deltaTime;
+            cameraMovement.x -= speed * Time.unscaledDeltaTime;
         }
         else if (mousePosition.x >= Screen.width - borderThickness)
         {
-            cameraMovement.x += speed * Time.deltaTime;
+            cameraMovement.x += speed * Time.unscaledDeltaTime;
         }
 
         if (mousePosition.y < borderThickness)
         {
-            cameraMovement.y -= speed * Time.deltaTime;
+            cameraMovement.y -= speed * Time.unscaledDeltaTime;
         }
         else if (mousePosition.y >= Screen.height - borderThickness)
         {
-            cameraMovement.y += speed * Time.deltaTime;
+            cameraMovement.y += speed * Time.unscaledDeltaTime;
         }
 
         transform.Translate(cameraMovement);
         
         // Handle scroll wheel input for zooming
         float scrollWheelInput = Input.GetAxis("Mouse ScrollWheel");
-        Vector3 zoomMovement = new Vector3(0f, 0f, scrollWheelInput * zoomSpeed * Time.deltaTime);
+        Vector3 zoomMovement = new Vector3(0f, 0f, scrollWheelInput * zoomSpeed * Time.unscaledDeltaTime);
         transform.Translate(zoomMovement);
 
         // Clamp camera position within defined bounds
