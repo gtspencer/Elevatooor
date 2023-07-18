@@ -37,16 +37,18 @@ public class GoldManager : MonoBehaviour
 
     public void AddGoldFromCustomer(float goldMultiplier)
     {
-        AddGold((int)Mathf.Floor(CurrentAvarageGoldPerCustomer * goldMultiplier));
+        var variance = CurrentAvarageGoldPerCustomer * .25;
+        var baseGold = Random.Range((int) (CurrentAvarageGoldPerCustomer - variance), (int) (CurrentAvarageGoldPerCustomer + variance) + 1);
+        AddGold((int)Mathf.Floor(baseGold * goldMultiplier));
     }
     
     public void AddGold(int newGold)
     {
-        this.CurrentGold = newGold;
+        this.CurrentGold += newGold;
     }
 
     public void RemoveGold(int oldGold)
     {
-        this.CurrentGold = oldGold;
+        this.CurrentGold -= oldGold;
     }
 }

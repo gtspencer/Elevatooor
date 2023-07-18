@@ -12,6 +12,7 @@ public class ElevatorRequest
     public int floor;
     [SerializeField]
     public bool goingUp;
+    [SerializeField] public bool insideRequest = false;
     /*public OutsideRequest outsideRequest;
     public InsideRequest insideRequest;*/
 }

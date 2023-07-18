@@ -19,6 +19,10 @@ public class ElevatorV2 : MonoBehaviour
     [SerializeField] private float speed = 5f;
     [SerializeField] private int weightLimit = 500; // lbs
 
+    public Action OnLitButtonsChanged;
+    private List<int> litButtons = new List<int>();
+    public List<int> LitButtons => litButtons;
+
     private int currentWeight = 0;
 
     [SerializeField]
@@ -121,8 +125,14 @@ public class ElevatorV2 : MonoBehaviour
     private float doorsOpenTime = 1f;
     private void NotifyFloorReady()
     {
-        floorQueue.RemoveAt(0);
+        // TODO use CurrentFloor or floorQueue[0]??
+        if (litButtons.Contains(CurrentFloor))
+        {
+            litButtons.Remove(CurrentFloor);
+            OnLitButtonsChanged?.Invoke();
+        }
         
+        floorQueue.RemoveAt(0);
         floorReachedCallbacks[CurrentFloor]?.Invoke();
     }
 
@@ -280,6 +290,12 @@ public class ElevatorV2 : MonoBehaviour
     public void RequestRide(ElevatorRequest request) 
     {
         requestPool.Add(request);
+
+        if (!litButtons.Contains(request.floor) && request.insideRequest)
+        {
+            litButtons.Add(request.floor);
+            OnLitButtonsChanged?.Invoke();
+        }
         
         ProcessRequestQueue();
     }

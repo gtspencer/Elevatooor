@@ -84,6 +84,7 @@ public class CameraController : MonoBehaviour
 
     private void CheckClick()
     {
+        // TODO refactor to use event repository, subscribe to elevator clicked event
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -95,6 +96,8 @@ public class CameraController : MonoBehaviour
                 if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Elevator"))
                 {
                     selectedElevator = hit.collider.gameObject.transform;
+                    
+                    EventRepository.Instance.OnElevatorSelected?.Invoke(selectedElevator.GetComponentInChildren<ElevatorV2>());
 
                     for (int i = 0; i < positionConstraint.sourceCount; i++)
                     {
@@ -126,5 +129,6 @@ public class CameraController : MonoBehaviour
 
         positionConstraint.constraintActive = false;
         selectedElevator = null;
+        EventRepository.Instance.OnElevatorUnSelected?.Invoke();
     }
 }

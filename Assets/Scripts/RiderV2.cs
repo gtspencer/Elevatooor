@@ -24,6 +24,7 @@ public class RiderV2 : MonoBehaviour
     private const float STARTING_MOOD_LEVEL = 50;
     private float moodLevel = 50;
     private float waitTime = 0;
+    private float rideTime = 0;
     
     public enum RiderState
     {
@@ -71,6 +72,9 @@ public class RiderV2 : MonoBehaviour
                 break;
             case RiderState.Business:
                 break;
+            case RiderState.Riding:
+                rideTime += Time.deltaTime;
+                break;
         }
     }
 
@@ -85,9 +89,9 @@ public class RiderV2 : MonoBehaviour
     {
         riderState = RiderState.Business;
         
-        var waitTime = UnityEngine.Random.Range(minBusinessTime, maxBusinessTime);
+        var businessTime = UnityEngine.Random.Range(minBusinessTime, maxBusinessTime);
 
-        yield return new WaitForSeconds(waitTime);
+        yield return new WaitForSeconds(businessTime);
 
         GetRandomElevator();
     }
@@ -163,7 +167,8 @@ public class RiderV2 : MonoBehaviour
         {
             floor = destinationFloor,
             goingUp = destinationFloor > currentFloor,
-            riderId = riderId
+            riderId = riderId,
+            insideRequest = true
         });
     }
 
@@ -211,7 +216,9 @@ public class RiderV2 : MonoBehaviour
     private void ResetRider()
     {
         Debug.LogError("Wait time: " + waitTime);
+        Debug.LogError("Ride time: " + rideTime);
         waitTime = 0;
+        rideTime = 0;
         moodLevel = STARTING_MOOD_LEVEL;
     }
 }
