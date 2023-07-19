@@ -30,6 +30,26 @@ public class RiderV2 : MonoBehaviour
     private float waitTime = 0;
     private float rideTime = 0;
     private float stuckTime = 0;
+    
+    #region Analytics
+    private List<int> floorsCalled = new List<int>();
+
+    public Analytics.RiderAnalytics GetRiderAnalytics()
+    {
+        Analytics.RiderAnalytics analytics = new Analytics.RiderAnalytics()
+        {
+            riderId = riderId,
+            weight = riderWeight,
+            moodLevel = moodLevel,
+            waitTime = waitTime,
+            rideTime = rideTime,
+            stuckTime = stuckTime,
+            floorsCalled = floorsCalled.ToArray()
+        };
+
+        return analytics;
+    }
+    #endregion
 
     public enum RiderState
     {
@@ -175,7 +195,7 @@ public class RiderV2 : MonoBehaviour
         {
             // Set the elevator's position to the exact target position
             transform.position = new Vector3(transform.position.x, transform.position.y, elevatorPosition);
-            RequestInitialRide();
+            RequestRide();
         }
     }
     
@@ -203,7 +223,7 @@ public class RiderV2 : MonoBehaviour
         }
     }
 
-    private void RequestInitialRide()
+    private void RequestRide()
     {
         riderState = RiderState.WaitingForElevator;
 
@@ -220,6 +240,8 @@ public class RiderV2 : MonoBehaviour
             // TODO randomly select another floor for multi floor customers?
             destinationFloor = 1;
         }
+        
+        floorsCalled.Add(destinationFloor);
         
         selectedBuildingUnit.floorsToElevatorFloors[currentFloor].RequestRide(this, goingUp);
     }
@@ -274,15 +296,14 @@ public class RiderV2 : MonoBehaviour
     
     private void RiderDone()
     {
+        // ANALYTICS
+        Analytics.Instance.AddRider(GetRiderAnalytics());
+        
         riderState = RiderState.Idle;
         OnLeftBuilding.Invoke(this);
         
         EventRepository.Instance.OnRiderFinished.Invoke(this);
-        
-        Debug.LogError("Wait time: " + waitTime);
-        Debug.LogError("Ride time: " + rideTime);
-        Debug.LogError("Stuck time: " + stuckTime);
-        
+
         GiveGold();
         ResetRider();
     }

@@ -1,0 +1,182 @@
+{
+    "totalRiders": 14,
+    "averageWaitTime": 33.543033599853519,
+    "averageRideTime": 30.820514678955079,
+    "averageStuckTime": 2.868584394454956,
+    "riders": [
+        {
+            "riderId": "386e32e7-03a0-4270-9181-1c287412ae59",
+            "weight": 167.4041748046875,
+            "moodLevel": 50.0,
+            "waitTime": 11.000061988830567,
+            "rideTime": 15.140156745910645,
+            "stuckTime": 0.0,
+            "floorsCalled": [
+                2,
+                1
+            ]
+        },
+        {
+            "riderId": "90a6ff4c-e79f-49c1-9250-e369fce8319f",
+            "weight": 150.92852783203126,
+            "moodLevel": 50.0,
+            "waitTime": 11.78007984161377,
+            "rideTime": 15.080155372619629,
+            "stuckTime": 0.0,
+            "floorsCalled": [
+                2,
+                1
+            ]
+        },
+        {
+            "riderId": "e35143fc-14dc-4056-84af-24d5683e9ac7",
+            "weight": 167.88597106933595,
+            "moodLevel": 50.0,
+            "waitTime": 22.96033477783203,
+            "rideTime": 17.140201568603517,
+            "stuckTime": 0.0,
+            "floorsCalled": [
+                2,
+                1
+            ]
+        },
+        {
+            "riderId": "3a88adb2-cfbf-41ce-a078-fc0aa5291004",
+            "weight": 157.6917724609375,
+            "moodLevel": 50.0,
+            "waitTime": 18.100223541259767,
+            "rideTime": 22.580326080322267,
+            "stuckTime": 0.0,
+            "floorsCalled": [
+                3,
+                1
+            ]
+        },
+        {
+            "riderId": "d5739847-8811-4bc3-8fd6-45a448a9c6bd",
+            "weight": 156.30120849609376,
+            "moodLevel": 50.0,
+            "waitTime": 31.100521087646486,
+            "rideTime": 22.660327911376954,
+            "stuckTime": 0.0,
+            "floorsCalled": [
+                3,
+                1
+            ]
+        },
+        {
+            "riderId": "775c788c-4f14-46d1-8644-dbb90b782d4f",
+            "weight": 153.41232299804688,
+            "moodLevel": 50.0,
+            "waitTime": 49.40093994140625,
+            "rideTime": 25.860401153564454,
+            "stuckTime": 0.0,
+            "floorsCalled": [
+                3,
+                1
+            ]
+        },
+        {
+            "riderId": "6c4f96bb-6a6b-41c1-a75e-dc6b84eec967",
+            "weight": 167.91116333007813,
+            "moodLevel": 50.0,
+            "waitTime": 13.220112800598145,
+            "rideTime": 16.22018051147461,
+            "stuckTime": 5.019996166229248,
+            "floorsCalled": [
+                3,
+                1
+            ]
+        },
+        {
+            "riderId": "6f0dae8f-c7bd-4064-9639-21e273d6a13d",
+            "weight": 169.4091796875,
+            "moodLevel": 50.0,
+            "waitTime": 78.59882354736328,
+            "rideTime": 25.52039337158203,
+            "stuckTime": 0.0,
+            "floorsCalled": [
+                4,
+                1
+            ]
+        },
+        {
+            "riderId": "0b27752f-4d68-4506-acb0-f66f7bb68745",
+            "weight": 127.40243530273438,
+            "moodLevel": 50.0,
+            "waitTime": 75.57933044433594,
+            "rideTime": 26.080406188964845,
+            "stuckTime": 0.0,
+            "floorsCalled": [
+                4,
+                1
+            ]
+        },
+        {
+            "riderId": "25168a7d-1000-4288-b8bb-0bbc3e0d886b",
+            "weight": 142.8920135498047,
+            "moodLevel": 50.0,
+            "waitTime": 67.34071350097656,
+            "rideTime": 24.800376892089845,
+            "stuckTime": 0.0,
+            "floorsCalled": [
+                4,
+                1
+            ]
+        },
+        {
+            "riderId": "23d9ebde-5d22-4747-8872-3efa3c0ae1ad",
+            "weight": 137.84521484375,
+            "moodLevel": 50.0,
+            "waitTime": 22.40032196044922,
+            "rideTime": 56.481101989746097,
+            "stuckTime": 15.060154914855957,
+            "floorsCalled": [
+                2,
+                1,
+                4,
+                1
+            ]
+        },
+        {
+            "riderId": "e11dbc4d-19ae-4d67-99ca-dc74252f3cb9",
+            "weight": 169.59193420410157,
+            "moodLevel": 50.0,
+            "waitTime": 21.98031234741211,
+            "rideTime": 55.24107360839844,
+            "stuckTime": 10.040040016174317,
+            "floorsCalled": [
+                2,
+                1,
+                4,
+                1
+            ]
+        },
+        {
+            "riderId": "9cbe6352-b3ef-471e-9edd-ce1a98aaa7d9",
+            "weight": 164.2251434326172,
+            "moodLevel": 50.0,
+            "waitTime": 23.960357666015626,
+            "rideTime": 55.26107406616211,
+            "stuckTime": 5.019996166229248,
+            "floorsCalled": [
+                3,
+                1,
+                4,
+                1
+            ]
+        },
+        {
+            "riderId": "3f16d6e9-852d-4a33-bf0e-2308dbdb47a5",
+            "weight": 179.15042114257813,
+            "moodLevel": 50.0,
+            "waitTime": 22.180316925048829,
+            "rideTime": 53.4210319519043,
+            "stuckTime": 5.019996166229248,
+            "floorsCalled": [
+                4,
+                1
+            ]
+        }
+    ]
+}
