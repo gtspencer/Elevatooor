@@ -16,17 +16,9 @@ public class EventRepository : MonoBehaviour
             Instance = this;
     }
     
-    public Action<ElevatorV2> OnElevatorSelected;
-    public Action OnElevatorUnSelected;
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public Action<ElevatorV2> OnElevatorSelected = (elevator) => { };
+    public Action OnElevatorUnSelected = () => { };
+    public Action<RiderV2> OnRiderFinished = (riderId) => { };
+    public Action<int> OnMoneyMade = (newMoney) => { };
+    public Action<int> OnHourChange = (hour) => { };
 }

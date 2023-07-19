@@ -17,18 +17,60 @@ public class ElevatorV2 : MonoBehaviour
     [SerializeField] private Text floorQueueUI;
 
     private float currentSpeed;
+    private float currentWeight = 0;
+    
     private float currentLerpTime;
     private float lerpDuration = 1f;
-    [SerializeField] private float maxSpeed = 5f;
-    [SerializeField] private float acceleration = 1f;
-    [SerializeField] private int weightLimit = 500; // lbs
+
+    private float maxElevatorSpeed => ElevatorUpgrades.ElevatorSpeedUpgrades[ElevatorSpeedLevel];
+    private float maxElevatorAccel => ElevatorUpgrades.ElevatorAccelerationUpgrades[ElevatorAccelLevel];
+    private float maxElevatorWeight => ElevatorUpgrades.ElevatorWeightLimitUpgrades[ElevatorWeightLimitLevel];
+    
+    #region Upgradeables
+    private int elevatorSpeedLevel = 1;
+    public int ElevatorSpeedLevel
+    {
+        get => elevatorSpeedLevel;
+        set
+        {
+            if (!ElevatorUpgrades.ElevatorSpeedUpgrades.ContainsKey(value))
+                return;
+
+            elevatorSpeedLevel = value;
+        }
+    }
+    
+    private int elevatorAccelLevel = 1;
+    public int ElevatorAccelLevel
+    {
+        get => elevatorAccelLevel;
+        set
+        {
+            if (!ElevatorUpgrades.ElevatorAccelerationUpgrades.ContainsKey(value))
+                return;
+
+            elevatorAccelLevel = value;
+        }
+    }
+
+    public int elevatorWeightLimitLevel = 1;
+    public int ElevatorWeightLimitLevel
+    {
+        get => elevatorWeightLimitLevel;
+        set
+        {
+            if (!ElevatorUpgrades.ElevatorWeightLimitUpgrades.ContainsKey(value))
+                return;
+
+            elevatorWeightLimitLevel = value;
+        }
+    }
+    #endregion
 
     [SerializeField] private bool showAllFloorsInQueue = true;
-    public Action OnLitButtonsChanged;
+    public Action OnLitButtonsChanged = () => { };
     private List<int> litButtons = new List<int>();
     public List<int> LitButtons => litButtons;
-
-    private int currentWeight = 0;
 
     [SerializeField]
     private List<int> floorQueue = new List<int>();
@@ -46,6 +88,7 @@ public class ElevatorV2 : MonoBehaviour
         DoorsOpening,
         PassengersExchanging,
         DoorsClosing,
+        OutOfService
     }
     
     public State elevatorState = State.Idle;
@@ -65,10 +108,29 @@ public class ElevatorV2 : MonoBehaviour
         floorReachedCallbacks[floor] += callback;
     }
 
+    public bool CanRiderGetOn(float riderWeight)
+    {
+        if (currentWeight + riderWeight > maxElevatorWeight)
+            return false;
+
+        return true;
+    }
+    
+    public void SetOutOfService(bool outOfService)
+    {
+        if (outOfService)
+            elevatorState = State.OutOfService;
+        else
+            elevatorState = State.Idle;
+    }
+
     // Update is called once per frame
     void FixedUpdate()
     {
         SetUI();
+
+        if (elevatorState == State.OutOfService)
+            return;
         
         if (floorQueue.Count <= 0) return;
 
@@ -115,7 +177,7 @@ public class ElevatorV2 : MonoBehaviour
         if (Mathf.Abs(transform.position.y - targetY) > 0.01f)
         {
             // Smoothly interpolate the elevator's position towards the target position
-            float t = maxSpeed * Time.deltaTime;
+            float t = maxElevatorSpeed * Time.deltaTime;
             float normalizedT = Mathf.SmoothStep(0f, 1f, t);
             
             transform.position = Vector3.Lerp(transform.position, new Vector3(position.x, targetY, position.z), normalizedT);
@@ -159,11 +221,11 @@ public class ElevatorV2 : MonoBehaviour
         if (litButtons.Contains(CurrentFloor))
         {
             litButtons.Remove(CurrentFloor);
-            OnLitButtonsChanged?.Invoke();
+            OnLitButtonsChanged.Invoke();
         }
         
         floorQueue.RemoveAt(0);
-        floorReachedCallbacks[CurrentFloor]?.Invoke();
+        floorReachedCallbacks[CurrentFloor].Invoke();
     }
 
     public void SetReadyToDepart()
@@ -315,6 +377,20 @@ public class ElevatorV2 : MonoBehaviour
         floorQueue.Insert(index, value);
     }
 
+    public void RiderGotOn(RiderV2 rider)
+    {
+        rider.OnGetOffElevator += RiderGotOff;
+        
+        currentWeight += rider.riderWeight;
+    }
+
+    public void RiderGotOff(RiderV2 rider)
+    {
+        rider.OnGetOffElevator -= RiderGotOff;
+        
+        currentWeight -= rider.riderWeight;
+    }
+
     public void RequestRide(ElevatorRequest request)
     {
         requestPool.Add(request);
@@ -322,7 +398,7 @@ public class ElevatorV2 : MonoBehaviour
         if (!litButtons.Contains(request.floor) && (request.insideRequest || showAllFloorsInQueue))
         {
             litButtons.Add(request.floor);
-            OnLitButtonsChanged?.Invoke();
+            OnLitButtonsChanged.Invoke();
         }
         
         ProcessRequestQueue();

@@ -1,12 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class RiderV2 : MonoBehaviour
 {
     public string riderId;
     public float riderSpeed = 3f;
+
+    public float riderWeight = 150f;
 
     public BuildingUnit selectedBuildingUnit;
     public ElevatorV2 ridingElevator;
@@ -18,14 +21,16 @@ public class RiderV2 : MonoBehaviour
 
     public int currentFloor = 1;
     public int destinationFloor = 2;
-
-    public Action<RiderV2> OnLeftBuilding;
+    
+    public Action<RiderV2> OnLeftBuilding = (rider) => { };
+    public Action<RiderV2> OnGetOffElevator = (rider) => { };
 
     private const float STARTING_MOOD_LEVEL = 50;
     private float moodLevel = 50;
     private float waitTime = 0;
     private float rideTime = 0;
-    
+    private float stuckTime = 0;
+
     public enum RiderState
     {
         Idle,
@@ -34,15 +39,34 @@ public class RiderV2 : MonoBehaviour
         Riding,
         GoingToDestination,
         StartBusiness,
-        Business
+        Business,
+        NoElevatorWander, // state for when no elevator is available, so wander around and check after x seconds
+        ImmediateExit
     }
 
     public RiderState riderState = RiderState.Idle;
+    
+    public void InitNewRider()
+    {
+        ResetRider();
+        SetRandomRiderProperties();
+        GetRandomElevator();
+    }
 
     public void GetRandomElevator()
     {
         // pick random unit, then get ElevatorFloor from unit
         // find random elevator
+        var unitsToChoose = Building.Instance.BuildingUnits.Where(unit => unit.Elevator.elevatorState != ElevatorV2.State.OutOfService && unit.Elevator.CanRiderGetOn(riderWeight));
+
+        if (unitsToChoose.Count() <= 0)
+        {
+            elevatorCheckTimer = 0;
+            riderState = RiderState.NoElevatorWander;
+            return;
+        }
+
+        currentElevatorChecks = 0;
         selectedBuildingUnitIndex = UnityEngine.Random.Range(0, Building.Instance.TotalUnits);
         selectedBuildingUnit = Building.Instance.BuildingUnits[selectedBuildingUnitIndex];
 
@@ -75,10 +99,57 @@ public class RiderV2 : MonoBehaviour
             case RiderState.Riding:
                 rideTime += Time.deltaTime;
                 break;
+            case RiderState.NoElevatorWander:
+                stuckTime += Time.deltaTime;
+                Wander();
+                break;
+            case RiderState.ImmediateExit:
+                JumpOutWindow();
+                break;
         }
     }
 
+    private const float ELEVATOR_CHECK_WAIT_TIME = 5f;
+    private float elevatorCheckTimer = 0;
+
+    private const int MAX_CHECKS = 10;
+    private int currentElevatorChecks = 0;
+    private bool riderStuck = false;
+    private void Wander()
+    {
+        // done with checking, just leave already
+        if (currentElevatorChecks >= MAX_CHECKS)
+        {
+            riderStuck = true;
+            if (currentFloor == 1)
+            {
+                riderState = RiderState.GoingToDestination;
+            }
+            else
+            {
+                riderState = RiderState.ImmediateExit;
+            }
+            return;
+        }
+
+        elevatorCheckTimer += Time.deltaTime;
+        
+        // wait time is over, check again
+        if (elevatorCheckTimer >= ELEVATOR_CHECK_WAIT_TIME)
+        {
+            currentElevatorChecks++;
+            GetRandomElevator();
+        }
+        
+        // TODO do some wandering
+    }
+
     private void CheckMood()
+    {
+        
+    }
+
+    private void JumpOutWindow()
     {
         
     }
@@ -116,7 +187,7 @@ public class RiderV2 : MonoBehaviour
         {
             // Set the elevator's position to the exact target position
             transform.position = new Vector3(transform.position.x, transform.position.y, RiderSpawnZone.Instance.transform.position.z);
-            LeaveBuilding();
+            RiderDone();
         }
     }
 
@@ -158,6 +229,7 @@ public class RiderV2 : MonoBehaviour
         riderState = RiderState.Riding;
 
         this.ridingElevator = elevator;
+        ridingElevator.RiderGotOn(this);
         
         this.transform.SetParent(ridingElevator.transform);
 
@@ -191,6 +263,8 @@ public class RiderV2 : MonoBehaviour
             GetRandomRoom();
         
         riderState = RiderState.GoingToDestination;
+        
+        OnGetOffElevator.Invoke(this);
     }
 
     private void GetRandomRoom()
@@ -198,11 +272,17 @@ public class RiderV2 : MonoBehaviour
         roomIndex = UnityEngine.Random.Range(0, Building.Instance.TotalUnits);
     }
     
-    private void LeaveBuilding()
+    private void RiderDone()
     {
         riderState = RiderState.Idle;
-        OnLeftBuilding?.Invoke(this);
-
+        OnLeftBuilding.Invoke(this);
+        
+        EventRepository.Instance.OnRiderFinished.Invoke(this);
+        
+        Debug.LogError("Wait time: " + waitTime);
+        Debug.LogError("Ride time: " + rideTime);
+        Debug.LogError("Stuck time: " + stuckTime);
+        
         GiveGold();
         ResetRider();
     }
@@ -210,15 +290,27 @@ public class RiderV2 : MonoBehaviour
     private void GiveGold()
     {
         // TODO calculate multiplier from mood and wait time
-        GoldManager.Instance.AddGoldFromCustomer(1);
+        GoldManager.Instance.AddGoldFromCustomer(CalculateGoldMultiplier());
+    }
+
+    private float CalculateGoldMultiplier()
+    {
+        return 1;
+    }
+
+    private void SetRandomRiderProperties()
+    {
+        riderWeight = UnityEngine.Random.Range(120f, 180f);
     }
 
     private void ResetRider()
     {
-        Debug.LogError("Wait time: " + waitTime);
-        Debug.LogError("Ride time: " + rideTime);
         waitTime = 0;
         rideTime = 0;
+        stuckTime = 0;
+        currentElevatorChecks = 1;
         moodLevel = STARTING_MOOD_LEVEL;
+        riderStuck = false;
+        riderState = RiderState.Idle;
     }
 }

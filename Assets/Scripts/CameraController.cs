@@ -102,7 +102,7 @@ public class CameraController : MonoBehaviour
                 {
                     selectedElevator = hit.collider.gameObject.transform;
                     
-                    EventRepository.Instance.OnElevatorSelected?.Invoke(selectedElevator.GetComponentInChildren<ElevatorV2>());
+                    EventRepository.Instance.OnElevatorSelected.Invoke(selectedElevator.GetComponentInChildren<ElevatorV2>());
 
                     for (int i = 0; i < positionConstraint.sourceCount; i++)
                     {
@@ -134,6 +134,6 @@ public class CameraController : MonoBehaviour
 
         positionConstraint.constraintActive = false;
         selectedElevator = null;
-        EventRepository.Instance.OnElevatorUnSelected?.Invoke();
+        EventRepository.Instance.OnElevatorUnSelected.Invoke();
     }
 }

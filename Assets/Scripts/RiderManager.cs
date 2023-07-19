@@ -16,7 +16,7 @@ public class RiderManager : MonoBehaviour
 
         riderScript.OnLeftBuilding += RiderLeftBuilding;
         
-        riderScript.GetRandomElevator();
+        riderScript.InitNewRider();
     }
 
     private void RiderLeftBuilding(RiderV2 rider)

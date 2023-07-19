@@ -33,7 +33,7 @@ public class ElevatorUI : MonoBehaviour
     {
         selectedElevator = elevator;
         elevator.OnLitButtonsChanged += UpdateUI;
-        CreateUI(Building.Instance.Floors, elevator.LitButtons);
+        CreateUI();
     }
 
     // TODO call this when adding a floor while this is open
@@ -48,12 +48,6 @@ public class ElevatorUI : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     private void DestroyAllButtons()
     {
         foreach (Image i in floorButtons.Values)
@@ -63,25 +57,20 @@ public class ElevatorUI : MonoBehaviour
     }
 
     // TODO refactor to reuse already created buttons
-    public void CreateUI(int totalFloors, List<int> litFloors)
+    public void CreateUI()
     {
         DestroyAllButtons();
         
-        for (int i = 1; i <= totalFloors; i++)
+        for (int i = 1; i <= Building.Instance.Floors; i++)
         {
             var button = GameObject.Instantiate(buttonPrefab, panelUI.transform);
 
             var image = button.GetComponentInChildren<Image>();
-            image.color = litFloors.Contains(i) ? litColor : defaultColor;
+            image.color = selectedElevator.LitButtons.Contains(i) ? litColor : defaultColor;
             floorButtons.Add(i, image);
             button.GetComponentInChildren<Text>().text = i.ToString();
         }
 
         panelUI.SetActive(true);
-    }
-
-    public void ToggleFloorButton(int floor, bool lit)
-    {
-        floorButtons[floor].color = lit ? litColor : defaultColor;
     }
 }

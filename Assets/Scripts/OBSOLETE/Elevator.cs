@@ -136,7 +136,7 @@ public class Elevator : MonoBehaviour
                 // Reset the time elapsed
                 timeElapsed = 0.0f;
 
-                ElevatorOnRequestedFloor?.Invoke(desiredFloors[0]);
+                ElevatorOnRequestedFloor.Invoke(desiredFloors[0]);
                 
                 // Remove the destination floor from the list
                 desiredFloors.RemoveAt(0);

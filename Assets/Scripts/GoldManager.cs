@@ -32,18 +32,17 @@ public class GoldManager : MonoBehaviour
     {
         goldTextUI.text = CurrentGold.ToString();
     }
-
-    public int CurrentAvarageGoldPerCustomer { get; set; } = 10;
-
+    
     public void AddGoldFromCustomer(float goldMultiplier)
     {
-        var variance = CurrentAvarageGoldPerCustomer * .25;
-        var baseGold = Random.Range((int) (CurrentAvarageGoldPerCustomer - variance), (int) (CurrentAvarageGoldPerCustomer + variance) + 1);
+        var variance = PlayerStatsManager.Instance.CurrentAvarageGoldPerCustomer * .25;
+        var baseGold = Random.Range((int) (PlayerStatsManager.Instance.CurrentAvarageGoldPerCustomer - variance), (int) (PlayerStatsManager.Instance.CurrentAvarageGoldPerCustomer + variance) + 1);
         AddGold((int)Mathf.Floor(baseGold * goldMultiplier));
     }
     
-    public void AddGold(int newGold)
+    private void AddGold(int newGold)
     {
+        EventRepository.Instance.OnMoneyMade.Invoke(newGold);
         this.CurrentGold += newGold;
     }
 

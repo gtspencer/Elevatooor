@@ -6,6 +6,7 @@ using UnityEngine.UI;
 
 public class TimeManager : MonoBehaviour
 {
+    [SerializeField] private float startingHour = 7;
     // 5 seconds per 10 minutes
     [SerializeField] private float secondsPerHour = 30;
     private float secondsPer10Minutes;
@@ -20,8 +21,6 @@ public class TimeManager : MonoBehaviour
     private Text timeText;
     [SerializeField]
     private Text dayText;
-
-    public Action<int> onHourChange = (hour) => { };
     
     #region Timescale Variables
     [SerializeField] private Text timescaleUI;
@@ -43,7 +42,7 @@ public class TimeManager : MonoBehaviour
         {
             currentTimescale = value;
             Time.timeScale = value;
-
+            
             UpdateTimeScaleUI();
         }
     }
@@ -97,8 +96,8 @@ public class TimeManager : MonoBehaviour
         playPauseUI.text = "||";
         
         secondsPer10Minutes = secondsPerHour / 6f;
-        currentHour = 1;
-        onHourChange.Invoke(currentHour);
+        currentHour = 7;
+        EventRepository.Instance.OnHourChange.Invoke(currentHour);
         SetTimeText();
     }
 
@@ -119,7 +118,7 @@ public class TimeManager : MonoBehaviour
         {
             current10Minute = 0;
             currentHour++;
-            onHourChange.Invoke(currentHour);
+            EventRepository.Instance.OnHourChange.Invoke(currentHour);
         }
 
         if (currentHour > 24)
