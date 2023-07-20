@@ -32,7 +32,13 @@ public class GoldManager : MonoBehaviour
     {
         goldTextUI.text = CurrentGold.ToString();
     }
-    
+
+    public void TestAddGold(int newGold)
+    {
+        EventRepository.Instance.OnMoneyMade.Invoke(newGold);
+        this.CurrentGold += newGold;
+    }
+
     public void AddGoldFromCustomer(float goldMultiplier)
     {
         var variance = PlayerStatsManager.Instance.CurrentAvarageGoldPerCustomer * .25;

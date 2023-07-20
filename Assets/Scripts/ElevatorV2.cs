@@ -27,6 +27,8 @@ public class ElevatorV2 : MonoBehaviour
     private float maxElevatorWeight => ElevatorUpgrades.ElevatorWeightLimitUpgrades[ElevatorWeightLimitLevel].value;
     
     #region Upgradeables
+
+    public int elevatorMaxSpeedLevelReached;
     private int elevatorSpeedLevel = 1;
     public int ElevatorSpeedLevel
     {
@@ -36,10 +38,14 @@ public class ElevatorV2 : MonoBehaviour
             if (!ElevatorUpgrades.ElevatorSpeedUpgrades.ContainsKey(value))
                 return;
 
+            if (value > elevatorMaxSpeedLevelReached)
+                elevatorMaxSpeedLevelReached = value;
+            
             elevatorSpeedLevel = value;
         }
     }
-    
+
+    public int elevatorMaxAccelLevelReached;
     private int elevatorAccelLevel = 1;
     public int ElevatorAccelLevel
     {
@@ -48,11 +54,15 @@ public class ElevatorV2 : MonoBehaviour
         {
             if (!ElevatorUpgrades.ElevatorAccelerationUpgrades.ContainsKey(value))
                 return;
+            
+            if (value > elevatorMaxAccelLevelReached)
+                elevatorMaxAccelLevelReached = value;
 
             elevatorAccelLevel = value;
         }
     }
 
+    public int elevatorMaxWeightLimitLevelReached;
     public int elevatorWeightLimitLevel = 1;
     public int ElevatorWeightLimitLevel
     {
@@ -62,6 +72,9 @@ public class ElevatorV2 : MonoBehaviour
             if (!ElevatorUpgrades.ElevatorWeightLimitUpgrades.ContainsKey(value))
                 return;
 
+            if (value > elevatorMaxWeightLimitLevelReached)
+                elevatorMaxWeightLimitLevelReached = value;
+            
             elevatorWeightLimitLevel = value;
         }
     }
@@ -100,6 +113,10 @@ public class ElevatorV2 : MonoBehaviour
     void Start()
     {
         this.gameObject.layer = LayerMask.NameToLayer("Elevator");
+        
+        elevatorMaxSpeedLevelReached = elevatorSpeedLevel;
+        elevatorMaxAccelLevelReached = elevatorAccelLevel;
+        elevatorMaxWeightLimitLevelReached = elevatorWeightLimitLevel;
     }
 
     public void AddFloorReachedCallback(int floor, Action callback)
@@ -403,4 +420,87 @@ public class ElevatorV2 : MonoBehaviour
         
         ProcessRequestQueue();
     }
+
+    #region Upgrade Logic
+
+    // action values: success, upgrade, previous level
+    public void UpgradeSpeed(int upgrade, Action<bool, int, int> upgradeSuccessfulCalllback)
+    {
+        if (ElevatorSpeedLevel == upgrade)
+        {
+            upgradeSuccessfulCalllback.Invoke(false, upgrade, upgrade);
+            return;
+        }
+
+        if (upgrade > elevatorMaxSpeedLevelReached)
+        {
+            // check cost, if not able to buy, return
+            var upgradeCost = ElevatorUpgrades.ElevatorSpeedUpgrades[upgrade].cost;
+            if (GoldManager.Instance.CurrentGold < upgradeCost)
+            {
+                upgradeSuccessfulCalllback.Invoke(false, upgrade, upgrade);
+                return;
+            }
+
+            GoldManager.Instance.RemoveGold(upgradeCost);
+        }
+
+        var previousLevel = ElevatorSpeedLevel;
+        ElevatorSpeedLevel = upgrade;
+        upgradeSuccessfulCalllback.Invoke(true, upgrade, previousLevel);
+    }
+    
+    public void UpgradeAccel(int upgrade, Action<bool, int, int> upgradeSuccessfulCalllback)
+    {
+        if (ElevatorAccelLevel == upgrade)
+        {
+            upgradeSuccessfulCalllback.Invoke(false, upgrade, upgrade);
+            return;
+        }
+
+        if (upgrade > elevatorMaxAccelLevelReached)
+        {
+            // check cost, if not able to buy, return
+            var upgradeCost = ElevatorUpgrades.ElevatorAccelerationUpgrades[upgrade].cost;
+            if (GoldManager.Instance.CurrentGold < upgradeCost)
+            {
+                upgradeSuccessfulCalllback.Invoke(false, upgrade, upgrade);
+                return;
+            }
+
+            GoldManager.Instance.RemoveGold(upgradeCost);
+        }
+
+        var previousLevel = ElevatorAccelLevel;
+        ElevatorAccelLevel = upgrade;
+        upgradeSuccessfulCalllback.Invoke(true, upgrade, previousLevel);
+    }
+    
+    public void UpgradeWeight(int upgrade, Action<bool, int, int> upgradeSuccessfulCalllback)
+    {
+        if (ElevatorWeightLimitLevel == upgrade)
+        {
+            upgradeSuccessfulCalllback.Invoke(false, upgrade, upgrade);
+            return;
+        }
+
+        if (upgrade > elevatorMaxWeightLimitLevelReached)
+        {
+            // check cost, if not able to buy, return
+            var upgradeCost = ElevatorUpgrades.ElevatorWeightLimitUpgrades[upgrade].cost;
+            if (GoldManager.Instance.CurrentGold < upgradeCost)
+            {
+                upgradeSuccessfulCalllback.Invoke(false, upgrade, upgrade);
+                return;
+            }
+
+            GoldManager.Instance.RemoveGold(upgradeCost);
+        }
+
+        var previousLevel = ElevatorWeightLimitLevel;
+        ElevatorWeightLimitLevel = upgrade;
+        upgradeSuccessfulCalllback.Invoke(true, upgrade, previousLevel);
+    }
+
+    #endregion
 }

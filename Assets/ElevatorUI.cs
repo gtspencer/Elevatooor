@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -32,11 +33,21 @@ public class ElevatorUI : MonoBehaviour
         upgradeContainer.SetActive(false);
         
         selectedElevator = null;
+        
+        speedLevelButtons.Clear();
     }
 
     private ElevatorV2 selectedElevator;
     private void OnElevatorSelected(ElevatorV2 elevator)
     {
+        if (elevator.Equals(selectedElevator))
+            return;
+
+        if (selectedElevator != null)
+        {
+            OnElevatorUnSelected();
+        }
+        
         selectedElevator = elevator;
         elevator.OnLitButtonsChanged += UpdateUI;
         CreateUI();
@@ -64,9 +75,9 @@ public class ElevatorUI : MonoBehaviour
     
     private void DestroyUpgradeUI()
     {
-        foreach (GameObject child in upgradeContainer.transform)
+        foreach (Transform child in upgradeContainer.transform)
         {
-            Destroy(child);
+            Destroy(child.gameObject);
         }
     }
 
@@ -75,7 +86,7 @@ public class ElevatorUI : MonoBehaviour
     {
         DestroyAllButtons();
         
-        // Create Buttons UI
+        // Create Lit Buttons UI
         for (int i = 1; i <= Building.Instance.Floors; i++)
         {
             var button = GameObject.Instantiate(buttonPrefab, panelUI.transform);
@@ -89,7 +100,9 @@ public class ElevatorUI : MonoBehaviour
         // Create Upgrade UI
         upgradeContainer.SetActive(true);
         
-        SetupSpeedUpgrades();
+        speedLevelButtons = SetupUpgradeUI(ElevatorUpgrades.ElevatorSpeedUpgrades, selectedElevator.ElevatorSpeedLevel, selectedElevator.elevatorMaxSpeedLevelReached, "Speed", 1);
+        accelLevelButtons = SetupUpgradeUI(ElevatorUpgrades.ElevatorAccelerationUpgrades, selectedElevator.ElevatorAccelLevel, selectedElevator.elevatorMaxAccelLevelReached, "Accel", 2);
+        weightLimitLevelButtons = SetupUpgradeUI(ElevatorUpgrades.ElevatorWeightLimitUpgrades, selectedElevator.ElevatorWeightLimitLevel, selectedElevator.elevatorMaxWeightLimitLevelReached, "Weight", 3);
 
         panelUI.SetActive(true);
     }
@@ -101,79 +114,149 @@ public class ElevatorUI : MonoBehaviour
     [SerializeField] private GameObject upgradeContainer;
 
     private Dictionary<int, Button> speedLevelButtons = new Dictionary<int, Button>();
-    public void SetupSpeedUpgrades(/*Dictionary<int, Button> leveButtons, int currentLevel*/)
+    private Dictionary<int, Button> accelLevelButtons = new Dictionary<int, Button>();
+    private Dictionary<int, Button> weightLimitLevelButtons = new Dictionary<int, Button>();
+
+    public Dictionary<int, Button> SetupUpgradeUI(Dictionary<int, Upgrade> upgrades, int currentLevel, int maxLevelReached, string upgradeName, int upgradeUIIndex)
     {
-        currentSpeedLevel = selectedElevator.ElevatorSpeedLevel;
-        
         var upgradeArea = Instantiate(this.upgradeAreaPrefab, upgradeContainer.transform);
-        upgradeArea.gameObject.name = "Speed Upgrade";
+        upgradeArea.gameObject.name = $"{upgradeName} Upgrade";
+        var yPosition = (startingUpgradeAreaPosition) - (upgradeArea.GetComponent<RectTransform>().rect.height * (upgradeUIIndex - 1));
+        upgradeArea.transform.localPosition = new Vector3(0, yPosition, 0);
 
-        upgradeArea.transform.GetChild(0).GetComponentInChildren<Text>().text = "Speed";
+        upgradeArea.transform.GetChild(0).GetComponentInChildren<Text>().text = upgradeName;
 
-        speedLevelButtons = new Dictionary<int, Button>();
+        var levelButtons = new Dictionary<int, Button>();
 
-        for (int i = 0; i < ElevatorUpgrades.ElevatorSpeedUpgrades.Count; i++)
+        for (int i = 0; i < upgrades.Count; i++)
         {
             var upgradeButton = Instantiate(upgradeButtonPrefab, upgradeArea.transform.GetChild(1).transform);
             var button = upgradeButton.GetComponentInChildren<Button>();
             var text = upgradeButton.GetComponentInChildren<Text>();
             
             int buttonLevelNumber = i + 1;
-            // button level is below or at current level
-            if (buttonLevelNumber > selectedElevator.ElevatorSpeedLevel + 1)
+            // button level is below or at current level, or the next one
+            if (buttonLevelNumber > maxLevelReached + 1)
             {
                 button.interactable = false;
             }
-
-            text.text = ElevatorUpgrades.ElevatorSpeedUpgrades[buttonLevelNumber].value + "\n$" + ElevatorUpgrades.ElevatorSpeedUpgrades[buttonLevelNumber].cost;
             
+            text.text = upgrades[buttonLevelNumber].value.ToString();
+            
+            if (buttonLevelNumber > maxLevelReached)
+                text.text += "\n$" + upgrades[buttonLevelNumber].cost;
+
             button.onClick.AddListener(() =>
             {
-                SpeedUpgradeSelected(buttonLevelNumber);
+                UpgradeSelected(buttonLevelNumber, upgradeName);
             });
 
-            speedLevelButtons.Add(buttonLevelNumber, button);
+            levelButtons.Add(buttonLevelNumber, button);
+
+            if (levelButtons.ContainsKey(currentLevel))
+            {
+                var colors = levelButtons[currentLevel].colors;
+                colors.normalColor = Color.green;
+                colors.selectedColor = Color.green;
+                levelButtons[currentLevel].colors = colors;
+            }
+        }
+
+        return levelButtons;
+    }
+
+    // TODO refactor these so its 1 success method
+    private void WasSpeedUpgradeSuccessful(bool success, int levelUpgraded, int previousLevel)
+    {
+        if (success)
+        {
+            if (levelUpgraded < ElevatorUpgrades.ElevatorSpeedUpgrades.Count)
+                speedLevelButtons[levelUpgraded + 1].interactable = true;
             
-            var colors = speedLevelButtons[currentSpeedLevel].colors;
-            colors.normalColor = Color.green;
-            colors.selectedColor = Color.green;
-            speedLevelButtons[currentSpeedLevel].colors = colors;
+            if (speedLevelButtons.ContainsKey(previousLevel))
+                ChangeButtonColor(speedLevelButtons[previousLevel], Color.white);
+        
+            ChangeButtonColor(speedLevelButtons[levelUpgraded], Color.green);
+            speedLevelButtons[levelUpgraded].GetComponentInChildren<Text>().text = ElevatorUpgrades.ElevatorSpeedUpgrades[levelUpgraded].value.ToString();
+        }
+        else
+        {
+            if (levelUpgraded != previousLevel)
+            {
+                if (speedLevelButtons.ContainsKey(previousLevel))
+                    ChangeButtonColor(speedLevelButtons[previousLevel], Color.white);
+            }
+        }
+    }
+    
+    private void WasWeightUpgradeSuccessful(bool success, int levelUpgraded, int previousLevel)
+    {
+        if (success)
+        {
+            if (levelUpgraded < ElevatorUpgrades.ElevatorWeightLimitUpgrades.Count)
+                weightLimitLevelButtons[levelUpgraded + 1].interactable = true;
+            
+            if (weightLimitLevelButtons.ContainsKey(previousLevel))
+                ChangeButtonColor(weightLimitLevelButtons[previousLevel], Color.white);
+        
+            ChangeButtonColor(weightLimitLevelButtons[levelUpgraded], Color.green);
+            weightLimitLevelButtons[levelUpgraded].GetComponentInChildren<Text>().text = ElevatorUpgrades.ElevatorWeightLimitUpgrades[levelUpgraded].value.ToString();
+        }
+        else
+        {
+            if (levelUpgraded != previousLevel)
+            {
+                if (weightLimitLevelButtons.ContainsKey(previousLevel))
+                    ChangeButtonColor(weightLimitLevelButtons[previousLevel], Color.white);
+            }
+        }
+    }
+    
+    private void WasAccelUpgradeSuccessful(bool success, int levelUpgraded, int previousLevel)
+    {
+        if (success)
+        {
+            if (levelUpgraded < ElevatorUpgrades.ElevatorAccelerationUpgrades.Count)
+                accelLevelButtons[levelUpgraded + 1].interactable = true;
+            
+            if (accelLevelButtons.ContainsKey(previousLevel))
+                ChangeButtonColor(accelLevelButtons[previousLevel], Color.white);
+        
+            ChangeButtonColor(accelLevelButtons[levelUpgraded], Color.green);
+            accelLevelButtons[levelUpgraded].GetComponentInChildren<Text>().text = ElevatorUpgrades.ElevatorAccelerationUpgrades[levelUpgraded].value.ToString();
+        }
+        else
+        {
+            if (levelUpgraded != previousLevel)
+            {
+                if (accelLevelButtons.ContainsKey(previousLevel))
+                    ChangeButtonColor(accelLevelButtons[previousLevel], Color.white);
+            }
         }
     }
 
-    private int currentSpeedLevel;
-
-    private void SpeedUpgradeSelected(int upgrade)
+    private void UpgradeSelected(int upgrade, string upgradeType)
     {
-        if (currentSpeedLevel == upgrade)
-            return;
-        
-        // need to buy upgrade
-        if (upgrade > selectedElevator.ElevatorSpeedLevel)
+        switch (upgradeType)
         {
-            // check cost, if not able to buy, return
-            var upgradeCost = ElevatorUpgrades.ElevatorSpeedUpgrades[upgrade].cost;
-            if (GoldManager.Instance.CurrentGold < upgradeCost)
-                return;
-
-            if (upgrade < ElevatorUpgrades.ElevatorSpeedUpgrades.Count)
-                speedLevelButtons[upgrade + 1].interactable = true;
-            
-            GoldManager.Instance.RemoveGold(upgradeCost);
+            case "Speed":
+                selectedElevator.UpgradeSpeed(upgrade, WasSpeedUpgradeSuccessful);
+                break;
+            case "Weight":
+                selectedElevator.UpgradeWeight(upgrade, WasWeightUpgradeSuccessful);
+                break;
+            case "Accel":
+                selectedElevator.UpgradeAccel(upgrade, WasAccelUpgradeSuccessful);
+                break;
         }
+    }
 
-        var colors = speedLevelButtons[currentSpeedLevel].colors;
-        colors.normalColor = Color.white;
-        colors.selectedColor = Color.white;
-        speedLevelButtons[currentSpeedLevel].colors = colors;
-        
-        var newColors = speedLevelButtons[upgrade].colors;
-        newColors.normalColor = Color.green;
-        newColors.selectedColor = Color.green;
-        speedLevelButtons[upgrade].colors = newColors;
-
-        currentSpeedLevel = upgrade;
-        selectedElevator.ElevatorSpeedLevel = upgrade;
+    private void ChangeButtonColor(Button button, Color newColor)
+    {
+        var colors = button.colors;
+        colors.normalColor = newColor;
+        colors.selectedColor = newColor;
+        button.colors = colors;
     }
 
     #endregion

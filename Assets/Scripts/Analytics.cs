@@ -16,6 +16,8 @@ public class Analytics : MonoBehaviour
         else
             Instance = this;
     }
+
+    [SerializeField] private bool doAnalytics = false;
     
     private string riderFileName = "RiderAnalysis.json";
     private string elevatorFileName = "ElevatorAnalysis.json";
@@ -34,6 +36,9 @@ public class Analytics : MonoBehaviour
 
     private void Start()
     {
+        if (!doAnalytics)
+            return;
+        
         string folderName = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
         
         // Set the file path for the JSON file
@@ -67,6 +72,9 @@ public class Analytics : MonoBehaviour
 
     private void OnApplicationQuit()
     {
+        if (!doAnalytics)
+            return;
+        
         riderAnalysis = new RiderListAnalytics()
         {
             riders = allRiders,
