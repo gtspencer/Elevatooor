@@ -15,16 +15,26 @@ public class ElevatorV2 : MonoBehaviour
     [SerializeField] private Text currentFloorUI;
     [SerializeField] private Text desiredFloorUI;
     [SerializeField] private Text floorQueueUI;
+    [SerializeField] private Text weightUI;
 
     private float currentSpeed;
     private float currentWeight = 0;
+    public float CurrentWeight
+    {
+        get => currentWeight;
+        set
+        {
+            currentWeight = value;
+            weightUI.text = $"{(int)currentWeight}/{MaxElevatorWeight}";
+        }
+    }
     
     private float currentLerpTime;
     private float lerpDuration = 1f;
 
-    private float maxElevatorSpeed => ElevatorUpgrades.ElevatorSpeedUpgrades[ElevatorSpeedLevel].value;
-    private float maxElevatorAccel => ElevatorUpgrades.ElevatorAccelerationUpgrades[ElevatorAccelLevel].value;
-    private float maxElevatorWeight => ElevatorUpgrades.ElevatorWeightLimitUpgrades[ElevatorWeightLimitLevel].value;
+    private float MaxElevatorSpeed => ElevatorUpgrades.ElevatorSpeedUpgrades[ElevatorSpeedLevel].value;
+    private float MaxElevatorAccel => ElevatorUpgrades.ElevatorAccelerationUpgrades[ElevatorAccelLevel].value;
+    private float MaxElevatorWeight => ElevatorUpgrades.ElevatorWeightLimitUpgrades[ElevatorWeightLimitLevel].value;
     
     #region Upgradeables
 
@@ -117,6 +127,8 @@ public class ElevatorV2 : MonoBehaviour
         elevatorMaxSpeedLevelReached = elevatorSpeedLevel;
         elevatorMaxAccelLevelReached = elevatorAccelLevel;
         elevatorMaxWeightLimitLevelReached = elevatorWeightLimitLevel;
+
+        CurrentWeight = 0;
     }
 
     public void AddFloorReachedCallback(int floor, Action callback)
@@ -127,7 +139,7 @@ public class ElevatorV2 : MonoBehaviour
 
     public bool CanRiderGetOn(float riderWeight)
     {
-        if (currentWeight + riderWeight > maxElevatorWeight)
+        if (CurrentWeight + riderWeight > MaxElevatorWeight)
             return false;
 
         return true;
@@ -194,7 +206,7 @@ public class ElevatorV2 : MonoBehaviour
         if (Mathf.Abs(transform.position.y - targetY) > 0.01f)
         {
             // Smoothly interpolate the elevator's position towards the target position
-            float t = maxElevatorSpeed * Time.deltaTime;
+            float t = MaxElevatorSpeed * Time.deltaTime;
             float normalizedT = Mathf.SmoothStep(0f, 1f, t);
             
             transform.position = Vector3.Lerp(transform.position, new Vector3(position.x, targetY, position.z), normalizedT);
@@ -398,14 +410,14 @@ public class ElevatorV2 : MonoBehaviour
     {
         rider.OnGetOffElevator += RiderGotOff;
         
-        currentWeight += rider.riderWeight;
+        CurrentWeight += rider.riderWeight;
     }
 
     public void RiderGotOff(RiderV2 rider)
     {
         rider.OnGetOffElevator -= RiderGotOff;
         
-        currentWeight -= rider.riderWeight;
+        CurrentWeight -= rider.riderWeight;
     }
 
     public void RequestRide(ElevatorRequest request)

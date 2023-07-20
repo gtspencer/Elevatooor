@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class ElevatorFloor : MonoBehaviour
@@ -12,6 +13,11 @@ public class ElevatorFloor : MonoBehaviour
 
     private List<RiderV2> riderQueue = new List<RiderV2>();
     private Dictionary<string, ElevatorRequest> ridersToRequests = new Dictionary<string, ElevatorRequest>();
+
+    [SerializeField]
+    private List<Transform> leftStandingArea = new List<Transform>();
+    [SerializeField]
+    private List<Transform> rightStandingArea = new List<Transform>();
 
     private void Start()
     {
@@ -85,6 +91,17 @@ public class ElevatorFloor : MonoBehaviour
             {
                 if (ridersToRequests[rider.riderId].goingUp)
                 {
+                    if (!elevator.CanRiderGetOn(rider.riderWeight))
+                    {
+                        foreach (RiderV2 removeRider in removeRiders)
+                        {
+                            riderQueue.Remove(removeRider);
+                        }
+                        
+                        SetElevatorReadyToDepart();
+                        yield break;
+                    }
+                    
                     rider.GetOnElevator(elevator);
                     removeRiders.Add(rider);
                     ridersToRequests.Remove(rider.riderId);
@@ -108,6 +125,18 @@ public class ElevatorFloor : MonoBehaviour
             {
                 if (!ridersToRequests[rider.riderId].goingUp)
                 {
+                    if (!elevator.CanRiderGetOn(rider.riderWeight))
+                    {
+                        foreach (RiderV2 removeRider in removeRiders)
+                        {
+                            riderQueue.Remove(removeRider);
+                        }
+                        
+                        SetElevatorReadyToDepart();
+                        // TODO re request rides?
+                        yield break;
+                    }
+                    
                     rider.GetOnElevator(elevator);
                     removeRiders.Add(rider);
                     ridersToRequests.Remove(rider.riderId);
