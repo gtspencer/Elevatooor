@@ -22,9 +22,9 @@ public class ElevatorV2 : MonoBehaviour
     private float currentLerpTime;
     private float lerpDuration = 1f;
 
-    private float maxElevatorSpeed => ElevatorUpgrades.ElevatorSpeedUpgrades[ElevatorSpeedLevel];
-    private float maxElevatorAccel => ElevatorUpgrades.ElevatorAccelerationUpgrades[ElevatorAccelLevel];
-    private float maxElevatorWeight => ElevatorUpgrades.ElevatorWeightLimitUpgrades[ElevatorWeightLimitLevel];
+    private float maxElevatorSpeed => ElevatorUpgrades.ElevatorSpeedUpgrades[ElevatorSpeedLevel].value;
+    private float maxElevatorAccel => ElevatorUpgrades.ElevatorAccelerationUpgrades[ElevatorAccelLevel].value;
+    private float maxElevatorWeight => ElevatorUpgrades.ElevatorWeightLimitUpgrades[ElevatorWeightLimitLevel].value;
     
     #region Upgradeables
     private int elevatorSpeedLevel = 1;
