@@ -11,7 +11,9 @@ public class ElevatorFloor : MonoBehaviour
 
     private int floor;
 
+    [SerializeField]
     private List<RiderV2> riderQueue = new List<RiderV2>();
+    [SerializeField]
     private Dictionary<string, ElevatorRequest> ridersToRequests = new Dictionary<string, ElevatorRequest>();
 
     [SerializeField]

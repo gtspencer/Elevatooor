@@ -4,6 +4,7 @@ Unity elevator simulator fun
 
 // TODO
 
+implement elevator wear level (how fast it wears down), let this be upgradeable
 lerp elevators with max speed and acceleration
 fix floor processing queue
 riders walk into elevator
